@@ -112,7 +112,7 @@
       "system": "vanity"
     }
   ],
-  "manifest": "https://raw.githubusercontent.com/slaguru666/vanity/main/system.json",
-  "download": "https://github.com/slaguru666/vanity/archive/refs/heads/main.zip",
-  "url": "https://github.com/slaguru666/vanity"
+  "manifest": "https://raw.githubusercontent.com/slaguru666/Vanity/main/system.json",
+  "download": "https://github.com/slaguru666/Vanity/archive/refs/heads/main.zip",
+  "url": "https://github.com/slaguru666/Vanity"
 }
