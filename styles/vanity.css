@@ -1,0 +1,1005 @@
+/* ============================================================
+   VANITY — Foundry VTT system stylesheet
+   Palette & typography from the VANITY print sheets:
+   parchment, gold, teal, plum · Cinzel + EB Garamond
+   ============================================================ */
+
+@font-face {
+  font-family: "Cinzel";
+  src: url("../fonts/Cinzel-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cinzel";
+  src: url("../fonts/Cinzel-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "EB Garamond";
+  src: url("../fonts/EBGaramond-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "EB Garamond";
+  src: url("../fonts/EBGaramond-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "EB Garamond";
+  src: url("../fonts/EBGaramond-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  --v-paper: #f7f0de;
+  --v-paper2: #fdf9ee;
+  --v-ink: #2a2317;
+  --v-ink2: #5c5342;
+  --v-gold: #b0872f;
+  --v-gold-d: #8a6a20;
+  --v-teal: #14544e;
+  --v-teal-d: #0e3f3a;
+  --v-plum: #6a3b5e;
+  --v-line: #c3ad78;
+  --v-fieldline: #a58f5c;
+}
+
+/* ---------------- Sheet chrome ---------------- */
+
+.vanity.sheet .window-content {
+  background: var(--v-paper) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' opacity='0.035'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+  color: var(--v-ink);
+  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  font-size: 14px;
+  padding: 10px 12px;
+}
+
+.vanity-sheet { color: var(--v-ink); }
+
+.vanity-sheet input[type="text"],
+.vanity-sheet input[type="number"] {
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--v-fieldline);
+  border-radius: 0;
+  color: var(--v-ink);
+  font-family: inherit;
+}
+.vanity-sheet input[type="text"]:focus,
+.vanity-sheet input[type="number"]:focus {
+  border-bottom-color: var(--v-teal);
+  box-shadow: none;
+  outline: none;
+}
+.vanity-sheet select {
+  background: var(--v-paper2);
+  border: 1px solid var(--v-line);
+  color: var(--v-ink);
+  font-family: inherit;
+}
+.vanity-sheet textarea {
+  background: var(--v-paper2);
+  border: 1.4px solid var(--v-fieldline);
+  border-radius: 4px;
+  color: var(--v-ink);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.vanity-sheet button {
+  background: var(--v-teal);
+  color: var(--v-paper);
+  border: none;
+  border-radius: 4px;
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+.vanity-sheet button:hover { background: var(--v-teal-d); box-shadow: 0 0 6px rgba(20, 84, 78, 0.5); }
+
+/* ---------------- Header ---------------- */
+
+.vanity-sheet .v-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 3px solid var(--v-gold);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+.vanity-sheet .v-portrait {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border: 2px solid var(--v-gold);
+  border-radius: 8px;
+  background: #fffdf6;
+  cursor: pointer;
+  flex: none;
+}
+.vanity-sheet .v-title { flex: 1; }
+.vanity-sheet .v-name {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  width: 100%;
+  height: 34px;
+}
+.vanity-sheet .v-sub { display: flex; gap: 6px; align-items: center; margin-top: 2px; color: var(--v-ink2); }
+.vanity-sheet .v-sub input { font-size: 13px; height: 22px; }
+.vanity-sheet .v-motto {
+  font-style: italic;
+  color: var(--v-ink2);
+  font-size: 12px;
+  text-align: right;
+  max-width: 190px;
+  line-height: 1.35;
+  flex: none;
+}
+
+/* ---------------- Banners ---------------- */
+
+.v-banner {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+.v-banner.rattled { background: #f0e3ea; color: var(--v-plum); border: 1px solid var(--v-plum); }
+.v-banner.reckoning { background: var(--v-plum); color: #f7f0de; }
+.v-banner.out { background: #4a1f1f; color: #f7f0de; }
+
+/* ---------------- Tabs ---------------- */
+
+.vanity-sheet .sheet-tabs {
+  border-bottom: 2px solid var(--v-gold);
+  margin-bottom: 8px;
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.vanity-sheet .sheet-tabs .item { color: var(--v-ink2); padding: 4px 10px; }
+.vanity-sheet .sheet-tabs .item.active {
+  color: var(--v-teal-d);
+  text-shadow: none;
+  border-bottom: 3px solid var(--v-teal);
+}
+.vanity-sheet { display: flex; flex-direction: column; height: 100%; }
+.vanity-sheet .sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+
+/* ---------------- Sections ---------------- */
+
+.vanity-sheet .v-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+.vanity-sheet .sect { margin-bottom: 10px; }
+.vanity-sheet .sect > .bar {
+  background: var(--v-teal);
+  color: #f7f0de;
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px 4px 0 0;
+}
+.vanity-sheet .sect > .body {
+  border: 1.4px solid var(--v-line);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  padding: 8px 10px 10px;
+  background: var(--v-paper2);
+}
+.vanity-sheet .hint { font-size: 12px; color: var(--v-ink2); font-style: italic; margin-top: 5px; }
+.vanity-sheet .hint a { color: var(--v-teal-d); text-decoration: underline; }
+.vanity-sheet .cap {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--v-ink2);
+  display: block;
+  margin-bottom: 2px;
+}
+.vanity-sheet label.f { display: block; margin-top: 8px; }
+
+/* ---------------- Attributes ---------------- */
+
+.vanity-sheet .attr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px dotted var(--v-line);
+}
+.vanity-sheet .attr:last-of-type { border-bottom: none; }
+.vanity-sheet .attr .num {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border: 2px solid var(--v-gold);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: #fffdf6;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.vanity-sheet .attr .num:hover { box-shadow: 0 0 8px rgba(176, 135, 47, 0.7); }
+.vanity-sheet .attr .meta { flex: 1; }
+.vanity-sheet .attr .nm {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  color: var(--v-teal-d);
+  cursor: pointer;
+}
+.vanity-sheet .attr .nm:hover { color: var(--v-gold-d); }
+.vanity-sheet .attr .ds { font-size: 12px; color: var(--v-ink2); }
+.vanity-sheet .attr .attr-input { width: 44px; text-align: center; font-size: 16px; flex: none; }
+
+/* ---------------- Grit track ---------------- */
+
+.vanity-sheet .grit-row { display: flex; gap: 12px; }
+.vanity-sheet .grit-row .mini input { width: 52px; text-align: center; }
+.vanity-sheet .track { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.vanity-sheet .cell {
+  width: 26px;
+  height: 26px;
+  border: 1.6px solid var(--v-ink2);
+  border-radius: 4px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  background: #fff;
+  cursor: pointer;
+}
+.vanity-sheet .cell span { font-size: 9px; color: #a99a78; padding: 0 2px; }
+.vanity-sheet .cell.half { border-color: var(--v-plum); box-shadow: inset 0 0 0 2px #f0e3ea; }
+.vanity-sheet .cell.filled { background: var(--v-teal); }
+.vanity-sheet .cell.filled span { color: #d6efe9; }
+
+/* ---------------- Pips ---------------- */
+
+.vanity-sheet .resrow { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.vanity-sheet .resrow .rl {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  width: 72px;
+  flex: none;
+}
+.vanity-sheet .resrow .rl.v { color: var(--v-gold-d); }
+.vanity-sheet .resrow .rl.k { color: var(--v-plum); }
+.vanity-sheet .resnote { font-size: 11.5px; color: var(--v-ink2); font-style: italic; margin: 1px 0 4px 82px; }
+.vanity-sheet .pips { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.vanity-sheet .pip {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--v-gold-d);
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.vanity-sheet .pip.filled { background: var(--v-gold); }
+.vanity-sheet .pip.hex { border-radius: 3px; transform: rotate(45deg); border-color: var(--v-plum); }
+.vanity-sheet .pip.hex.filled { background: var(--v-plum); }
+.vanity-sheet .resrow.glory input { width: 56px; text-align: center; font-size: 16px; }
+
+/* ---------------- Knacks ---------------- */
+
+.vanity-sheet .knack-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px dotted var(--v-line);
+}
+.vanity-sheet .knack-row .kn { flex: 1; font-size: 14px; cursor: pointer; }
+.vanity-sheet .knack-row .kn:hover { color: var(--v-teal-d); text-decoration: underline; }
+.vanity-sheet .knack-row .kn em { color: var(--v-ink2); font-size: 11.5px; }
+.vanity-sheet .knack-row .pool {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 11px;
+  color: var(--v-gold-d);
+  width: 26px;
+  text-align: right;
+}
+.vanity-sheet .knack-row .rank { display: flex; gap: 4px; cursor: pointer; }
+.vanity-sheet .ck {
+  width: 14px;
+  height: 14px;
+  border: 1.6px solid var(--v-ink2);
+  border-radius: 3px;
+  background: #fff;
+  display: inline-block;
+}
+.vanity-sheet .ck.on { background: var(--v-teal); }
+
+.vanity-sheet .locked {
+  margin-top: 10px;
+  border: 2px solid var(--v-gold);
+  border-radius: 6px;
+  background: #fbf3dd;
+  padding: 7px 9px;
+}
+.vanity-sheet .locked .t {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--v-gold-d);
+  margin-bottom: 4px;
+}
+.vanity-sheet .locked-row { display: flex; gap: 6px; align-items: center; }
+.vanity-sheet .locked-row select { flex: 1; min-width: 0; }
+.vanity-sheet .locked-row .locked-roll { flex: none; padding: 4px 10px; }
+
+/* ---------------- Items & tables ---------------- */
+
+.vanity-sheet .v-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.vanity-sheet .v-table th {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--v-gold-d);
+  text-align: left;
+  padding: 3px 5px;
+  border-bottom: 1px solid var(--v-line);
+}
+.vanity-sheet .v-table td { padding: 3px 5px; border-bottom: 1px solid var(--v-line); vertical-align: top; }
+.vanity-sheet .v-table td.ctrl, .vanity-sheet .v-table th.ctrl { width: 40px; white-space: nowrap; }
+.vanity-sheet .v-table .props { color: var(--v-ink2); font-size: 12.5px; }
+.vanity-sheet .v-table tr.spent td { opacity: 0.45; }
+.vanity-sheet .listtag {
+  font-size: 10px;
+  color: var(--v-plum);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-style: normal;
+  margin-left: 4px;
+}
+.vanity-sheet a.item-attack i, .vanity-sheet a.item-cast i { color: var(--v-teal-d); font-size: 15px; }
+.vanity-sheet a.item-attack:hover i, .vanity-sheet a.item-cast:hover i { color: var(--v-gold-d); text-shadow: 0 0 6px rgba(176,135,47,.7); }
+.vanity-sheet a.item-edit i, .vanity-sheet a.item-delete i, .vanity-sheet a.item-spent i, .vanity-sheet a.item-equip i {
+  color: var(--v-ink2);
+  font-size: 12px;
+}
+.vanity-sheet a.item-delete:hover i { color: #8a2f2f; }
+
+.vanity-sheet .item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px dotted var(--v-line);
+}
+.vanity-sheet .item-row .item-name { font-size: 14px; }
+.vanity-sheet .item-row .item-name.unequipped { opacity: 0.5; }
+.vanity-sheet .item-row .item-note { flex: 1; color: var(--v-ink2); font-size: 12.5px; font-style: italic; }
+
+.vanity-sheet .coin-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+.vanity-sheet .coin-row label { font-size: 12px; color: var(--v-ink2); }
+.vanity-sheet .coin-row input { width: 52px; text-align: center; }
+
+/* ---------------- Quickbar & reference ---------------- */
+
+.vanity-sheet .v-quickbar { display: flex; gap: 8px; margin-bottom: 8px; }
+.vanity-sheet .v-quickbar button { flex: 1; padding: 6px 4px; }
+
+.vanity-sheet .ref {
+  border: 1.4px solid var(--v-line);
+  border-radius: 6px;
+  background: #fbf6e9;
+  padding: 9px 11px;
+  margin-top: 4px;
+}
+.vanity-sheet .ref h3 {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--v-teal-d);
+  margin: 0 0 5px;
+  border: none;
+}
+.vanity-sheet .ref .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 12px; line-height: 1.5; }
+.vanity-sheet .ref b { color: var(--v-gold-d); }
+
+/* ---------------- Companion ---------------- */
+
+.vanity-sheet .companion-grid { display: grid; grid-template-columns: 2fr 1fr 1.4fr auto; gap: 10px; align-items: end; }
+.vanity-sheet .companion-grid .wide { grid-column: 1 / -1; }
+.vanity-sheet .companion-grid input[type="number"] { width: 44px; text-align: center; }
+.vanity-sheet .companion-roll { padding: 5px 12px; }
+
+/* ---------------- NPC sheet ---------------- */
+
+.vanity-sheet.npc .npc-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; }
+.vanity-sheet.npc .npc-line { display: flex; align-items: center; gap: 7px; padding: 3px 0; }
+.vanity-sheet.npc .npc-line .lbl {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--v-teal-d);
+  min-width: 58px;
+}
+.vanity-sheet.npc .npc-line .pool { width: 44px; text-align: center; font-size: 16px; }
+.vanity-sheet.npc .npc-line .d { color: var(--v-ink2); }
+.vanity-sheet.npc .npc-line .note { flex: 1; font-size: 12.5px; }
+.vanity-sheet.npc .npc-line .hint { margin: 0; }
+.vanity-sheet.npc .npc-roll i { color: var(--v-teal-d); font-size: 15px; width: 18px; text-align: center; }
+.vanity-sheet.npc .npc-roll:hover i { color: var(--v-gold-d); }
+.vanity-sheet.npc .npc-line.nemesis .lbl { color: var(--v-plum); }
+.vanity-sheet.npc .v-sub select { max-width: 200px; }
+
+/* ---------------- Item sheet ---------------- */
+
+.vanity-sheet.item .item-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px 12px; }
+.vanity-sheet.item .item-fields .wide { grid-column: 1 / -1; }
+.vanity-sheet.item .typetag {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--v-gold-d);
+}
+
+/* ============================================================
+   Chat cards
+   ============================================================ */
+
+.vanity-roll {
+  background: var(--v-paper);
+  border: 1.5px solid var(--v-line);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--v-ink);
+  font-family: "EB Garamond", Georgia, serif;
+}
+.vanity-roll header {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 2px solid var(--v-gold);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+.vanity-roll .vanity-roll-label {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--v-teal-d);
+}
+.vanity-roll .vanity-roll-sub { font-size: 12px; color: var(--v-ink2); font-style: italic; }
+.vanity-dice { display: flex; flex-wrap: wrap; gap: 3px; font-size: 30px; line-height: 1; margin: 4px 0; }
+.vanity-die { color: #9c9270; }
+.vanity-die.success { color: var(--v-teal); text-shadow: 0 0 5px rgba(20, 84, 78, 0.35); }
+.vanity-die.bane { color: var(--v-plum); text-shadow: 0 0 5px rgba(106, 59, 94, 0.4); }
+.vanity-outcome { font-size: 14px; margin-top: 2px; }
+.vanity-outcome .good { color: var(--v-teal-d); font-weight: 700; }
+.vanity-outcome .bad { color: #8a2f2f; font-weight: 700; }
+.vanity-outcome .banes { color: var(--v-plum); }
+.vanity-outcome .pushed { color: var(--v-gold-d); font-style: italic; }
+.vanity-extra { font-size: 12.5px; margin-top: 5px; color: var(--v-ink2); }
+.vanity-extra .pushed-note { font-style: italic; color: var(--v-gold-d); }
+.vanity-miscast {
+  margin-top: 5px;
+  border: 1.5px solid var(--v-plum);
+  border-radius: 4px;
+  background: #f6ebf2;
+  color: var(--v-ink);
+  padding: 5px 8px;
+}
+.vanity-extra .spent-note { font-style: italic; }
+.vanity-buttons { display: flex; gap: 6px; margin-top: 7px; }
+.vanity-buttons button {
+  flex: 1;
+  background: var(--v-teal);
+  color: var(--v-paper);
+  border: none;
+  border-radius: 4px;
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+.vanity-buttons button:hover { background: var(--v-teal-d); }
+.vanity-buttons .vanity-fizzle { background: var(--v-plum); }
+
+/* ---------------- Roll dialog ---------------- */
+
+.vanity-roll-dialog .pool-line { font-size: 14px; }
+.vanity-roll-dialog .pool-line .rattled { color: var(--v-plum); font-weight: bold; }
+.vanity-roll-dialog .hint { font-size: 12px; font-style: italic; }
+
+/* ============================================================
+   Journal styling (rulebook, GM screen, adventure)
+   ============================================================ */
+
+.vanity-journal {
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.vanity-journal h1, .vanity-journal h2, .vanity-journal h3,
+.vanity-journal h4, .vanity-journal h5 {
+  font-family: "Cinzel", Georgia, serif;
+  color: var(--v-teal-d, #0e3f3a);
+  border-bottom: none;
+  letter-spacing: 0.04em;
+}
+.vanity-journal h1 {
+  border-bottom: 3px solid var(--v-gold, #b0872f);
+  padding-bottom: 4px;
+}
+.vanity-journal h2 {
+  border-bottom: 1.5px solid var(--v-line, #c3ad78);
+  padding-bottom: 3px;
+  margin-top: 1.2em;
+}
+.vanity-journal h3 { color: var(--v-gold-d, #8a6a20); margin-top: 1em; }
+.vanity-journal table {
+  border-collapse: collapse;
+  margin: 0.6em 0;
+  background: rgba(253, 249, 238, 0.55);
+}
+.vanity-journal th {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 0.72em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--v-gold-d, #8a6a20);
+  text-align: left;
+  border-bottom: 1.6px solid var(--v-gold, #b0872f);
+  padding: 4px 8px;
+}
+.vanity-journal td {
+  border-bottom: 1px solid var(--v-line, #c3ad78);
+  padding: 4px 8px;
+  vertical-align: top;
+}
+.vanity-journal blockquote {
+  border-left: 3px solid var(--v-gold, #b0872f);
+  background: rgba(251, 243, 221, 0.5);
+  margin: 0.6em 0;
+  padding: 6px 12px;
+  font-style: normal;
+}
+.vanity-journal hr {
+  border: none;
+  border-top: 2px solid var(--v-gold, #b0872f);
+  margin: 1.2em 0;
+}
+.vanity-journal code {
+  font-family: inherit;
+  background: rgba(195, 173, 120, 0.25);
+  padding: 0 3px;
+  border-radius: 3px;
+}
+.vanity-screen h2 { margin-top: 0.9em; }
+
+/* Locked-knack row: keep the selects readable, the roll button compact */
+.vanity-sheet .locked-row select { width: auto; flex: 1 1 33%; min-width: 70px; }
+.vanity-sheet .locked-row .locked-roll { width: auto; flex: 0 0 auto; padding: 4px 12px; }
+
+/* ============================================================
+   The Forge — directory buttons & chat cards
+   ============================================================ */
+
+.vanity-forge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 6px;
+  border-top: 2px solid var(--v-gold);
+  background: rgba(20, 84, 78, 0.25);
+}
+.vanity-forge .forge-title {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--v-gold);
+  margin-right: 2px;
+}
+.vanity-forge button {
+  flex: 1 1 auto;
+  width: auto;
+  background: var(--v-teal);
+  color: #f7f0de;
+  border: 1px solid var(--v-teal-d);
+  border-radius: 4px;
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 10px;
+  padding: 2px 5px;
+  cursor: pointer;
+  line-height: 1.5;
+}
+.vanity-forge button i { font-size: 9px; }
+.vanity-forge button:hover {
+  background: var(--v-gold-d);
+  border-color: var(--v-gold);
+  box-shadow: 0 0 6px rgba(176, 135, 47, 0.6);
+}
+
+.vanity-forge-card p { margin: 4px 0; font-size: 13.5px; }
+.vanity-forge-card i { color: var(--v-ink2); }
+
+/* Special Attacks panel on strong attack rolls */
+.vanity-roll .vanity-special {
+  margin-top: 6px;
+  border: 1.4px solid var(--v-line);
+  border-radius: 4px;
+  background: #fbf6e9;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+.vanity-roll .vanity-special summary {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--v-teal-d);
+  cursor: pointer;
+  outline: none;
+}
+.vanity-roll .vanity-special p { margin: 3px 0; line-height: 1.45; }
+.vanity-roll .vanity-special p b { color: var(--v-gold-d); }
+.vanity-roll .vanity-special .sa-note { font-style: italic; color: var(--v-ink2); }
+
+/* Interactive spend panel on attack cards */
+.vanity-roll .vanity-spend {
+  margin-top: 6px;
+  border: 1.4px solid var(--v-line);
+  border-radius: 4px;
+  background: #fbf6e9;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+.vanity-spend .spend-def { display: flex; align-items: center; gap: 7px; }
+.vanity-spend .spend-def .lbl {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--v-ink2);
+}
+.vanity-spend .def-btn {
+  width: 20px; height: 20px;
+  background: var(--v-teal);
+  color: #f7f0de;
+  border: none; border-radius: 3px;
+  font-size: 13px; line-height: 1;
+  cursor: pointer; padding: 0;
+}
+.vanity-spend .def-btn:disabled { opacity: 0.35; cursor: default; }
+.vanity-spend .def-n { min-width: 14px; text-align: center; font-size: 14px; }
+.vanity-spend .turned { margin-top: 5px; font-style: italic; color: var(--v-plum); font-weight: 600; }
+.vanity-spend .dmg-line { display: flex; justify-content: space-between; align-items: baseline; margin: 6px 0 4px; }
+.vanity-spend .dmg-line .dmg { font-size: 14px; color: var(--v-teal-d); }
+.vanity-spend .dmg-line .dmg b { font-size: 15px; }
+.vanity-spend .dmg-line .left { font-style: italic; color: var(--v-gold-d); }
+.vanity-spend .spend-buttons { display: flex; flex-wrap: wrap; gap: 4px; }
+.vanity-spend .dmg-row { margin-bottom: 4px; }
+.vanity-spend .man-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+.vanity-spend .man-grid .spend-btn {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 3px 7px;
+}
+.vanity-spend .spend-btn {
+  background: #fff;
+  border: 1.4px solid var(--v-line);
+  border-radius: 3px;
+  color: var(--v-ink);
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 12px;
+  line-height: 1.3;
+  padding: 2px 7px;
+  cursor: pointer;
+  width: auto;
+}
+.vanity-spend .spend-btn i {
+  font-style: normal;
+  font-size: 9px;
+  color: var(--v-gold-d);
+  margin-left: 4px;
+  vertical-align: super;
+}
+.vanity-spend .spend-btn:hover:not(:disabled) { border-color: var(--v-teal); box-shadow: 0 0 4px rgba(20,84,78,.35); }
+.vanity-spend .spend-btn.sel { background: var(--v-teal); color: #f7f0de; border-color: var(--v-teal-d); }
+.vanity-spend .spend-btn.sel i { color: #e0c98a; }
+.vanity-spend .spend-btn:disabled { opacity: 0.35; cursor: default; }
+.vanity-spend .spend-btn.dmg-btn { border-color: var(--v-gold-d); }
+.vanity-spend .prop-hints { margin-top: 4px; font-size: 11.5px; font-style: italic; color: var(--v-ink2); }
+.vanity-spend .prop-hints b { color: var(--v-gold-d); }
+
+/* Declared-maneuver descriptions at the foot of the card */
+.vanity-spend .man-desc {
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px dotted var(--v-line);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.vanity-spend .man-desc .man-name {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--v-teal-d);
+}
+.vanity-spend .man-desc .man-cost {
+  margin-left: 6px;
+  font-size: 10.5px;
+  font-style: italic;
+  color: var(--v-gold-d);
+}
+.vanity-spend .man-desc p { margin: 2px 0 0; }
+.vanity-spend .man-desc p b { color: var(--v-teal-d); }
+.vanity-spend .man-desc p i { color: var(--v-ink2); }
+
+/* Softer note for unbanked 1s (the GM's free twist) */
+.vanity-outcome .banes.soft { color: var(--v-ink2); font-style: italic; }
+
+/* The Tab — bane herald cards & the Twist the Knife button */
+.vanity-tab-note { border-color: #8a1f1f; }
+.vanity-tab-note.bane-bank header { border-bottom-color: #8a1f1f; }
+.vanity-tab-note .vanity-roll-label { color: #8a1f1f; }
+.vanity-tab-note .reck { color: #8a1f1f; letter-spacing: 0.08em; }
+.vanity-roll .vanity-twist {
+  background: #8a1f1f;
+  color: #f7f0de;
+  border: 1px solid #3d0d0d;
+  border-radius: 4px;
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 4px 8px;
+  cursor: pointer;
+  width: 100%;
+}
+.vanity-roll .vanity-twist:hover { background: #6d1717; box-shadow: 0 0 6px rgba(138, 31, 31, 0.6); }
+.vanity-roll .twist-row { margin-top: 6px; }
+.vanity-roll .vanity-twist.free { background: #fdf9ee; color: #8a1f1f; border: 1.4px solid #8a1f1f; }
+.vanity-roll .vanity-twist.free:hover { background: #f6e7e7; box-shadow: 0 0 5px rgba(138, 31, 31, 0.45); }
+.vanity-roll .twist-spent { margin-top: 5px; font-size: 11.5px; font-style: italic; color: #8a1f1f; }
+
+/* THE RECKONING button — darker than the knife */
+.vanity-roll .vanity-reckon {
+  background: #3d0d0d;
+  color: #f2e2b3;
+  border: 1.6px solid #8a1f1f;
+  border-radius: 4px;
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  padding: 5px 8px;
+  cursor: pointer;
+  width: 100%;
+  text-transform: uppercase;
+}
+.vanity-roll .vanity-reckon:hover { background: #8a1f1f; box-shadow: 0 0 8px rgba(138, 31, 31, 0.7); }
+
+/* ============================================================
+   The pause — the world admires itself
+   ============================================================ */
+
+#pause {
+  background: none;
+}
+#pause img {
+  content: url("../assets/pause-ring.svg");
+  width: 160px;
+  height: 160px;
+  opacity: 1;
+  animation: vanity-ring-spin 30s linear infinite;
+  filter: drop-shadow(0 0 18px rgba(176, 135, 47, 0.45));
+}
+#pause::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(50% - 80px);
+  width: 160px;
+  height: 160px;
+  background: url("../assets/pause-crown.svg") center / contain no-repeat;
+  animation: vanity-crown-breathe 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+#pause figcaption {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 22px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: #e0c98a;
+  text-shadow: 0 0 12px rgba(176, 135, 47, 0.65), 0 2px 4px #000;
+  animation: vanity-caption-glow 4.5s ease-in-out infinite;
+}
+@keyframes vanity-ring-spin { to { transform: rotate(360deg); } }
+@keyframes vanity-crown-breathe {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(224, 201, 138, 0.35)); }
+  50% { transform: scale(1.06); filter: drop-shadow(0 0 16px rgba(224, 201, 138, 0.75)); }
+}
+@keyframes vanity-caption-glow {
+  0%, 100% { opacity: 0.82; }
+  50% { opacity: 1; }
+}
+
+/* Draft 13 sheet buttons */
+.vanity-sheet .v-quickbar .refuse-fall { background: var(--v-plum); }
+.vanity-sheet .v-quickbar .refuse-fall:hover { background: #4d2a44; box-shadow: 0 0 6px rgba(106, 59, 94, 0.6); }
+.vanity-sheet .vice-play {
+  width: auto;
+  flex: none;
+  font-size: 10px;
+  padding: 2px 8px;
+  background: var(--v-gold-d);
+}
+.vanity-sheet .vice-play:hover { background: var(--v-gold); box-shadow: 0 0 5px rgba(176, 135, 47, 0.6); }
+
+/* Spell banner on cast cards */
+.vanity-roll .vanity-spellcard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.4px solid var(--v-teal);
+  border-radius: 5px;
+  background: #f2ece0;
+  padding: 5px 7px;
+  margin: 6px 0 2px;
+}
+.vanity-roll .vanity-spellcard.divine { border-color: var(--v-gold-d); }
+.vanity-roll .vanity-spellcard.trick { border-color: #3d6b34; }
+.vanity-roll .vanity-spellcard img {
+  width: 42px;
+  height: 42px;
+  border: 1.5px solid var(--v-gold);
+  border-radius: 5px;
+  flex: none;
+  object-fit: cover;
+}
+.vanity-roll .vanity-spellcard .sc-line {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--v-gold-d);
+}
+.vanity-roll .vanity-spellcard .sc-line i { text-transform: none; letter-spacing: normal; color: var(--v-ink2); }
+.vanity-roll .vanity-spellcard .sc-effect { font-size: 13px; line-height: 1.35; }
+.vanity-roll .sc-scaling {
+  margin-top: 5px;
+  border: 1.4px solid var(--v-gold);
+  border-radius: 4px;
+  background: #fbf3dd;
+  padding: 4px 8px;
+  font-size: 12.5px;
+}
+.vanity-roll .sc-scaling b { color: var(--v-gold-d); }
+
+/* ============================================================
+   Conditions — grouped icon chips + a details panel at the foot
+   ============================================================ */
+.vanity-sheet .v-conditions {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding: 4px 2px 7px;
+  margin-bottom: 6px;
+  border-bottom: 1.5px dotted var(--v-line);
+}
+.vanity-sheet .cond-group { display: flex; flex-wrap: wrap; gap: 3px; padding-right: 8px; }
+.vanity-sheet .cond-group + .cond-group { border-left: 1px solid var(--v-line); padding-left: 10px; }
+.vanity-sheet .cond-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px 1px 2px;
+  border: 1.3px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  opacity: 0.62;
+  transition: opacity 0.12s, background 0.12s, box-shadow 0.12s;
+}
+.vanity-sheet .cond-badge img {
+  width: 20px; height: 20px; flex: none;
+  filter: grayscale(0.55);
+  transition: filter 0.12s;
+}
+.vanity-sheet .cond-badge .cond-name { font-size: 10.5px; color: var(--v-ink2); white-space: nowrap; }
+.vanity-sheet .cond-badge:hover { opacity: 0.9; background: rgba(176,135,47,0.08); }
+.vanity-sheet .cond-badge.on {
+  opacity: 1;
+  background: #fff;
+  border-color: var(--cc, var(--v-gold));
+  box-shadow: 0 0 5px var(--ccg, rgba(176,135,47,.45));
+}
+.vanity-sheet .cond-badge.on img { filter: none; }
+.vanity-sheet .cond-badge.on .cond-name { color: var(--v-ink); font-weight: 600; }
+.vanity-sheet .cond-badge.combat { --cc:#8a2f2f; --ccg:rgba(138,47,47,.5); }
+.vanity-sheet .cond-badge.spell  { --cc:var(--v-teal); --ccg:rgba(20,84,78,.5); }
+.vanity-sheet .cond-badge.state  { --cc:var(--v-plum); --ccg:rgba(106,59,94,.5); }
+
+.vanity-sheet .v-cond-detail {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 8px 2px 0;
+  padding: 8px 10px;
+  border: 1.5px solid var(--cc, var(--v-gold));
+  border-left-width: 5px;
+  border-radius: 5px;
+  background: var(--v-paper2);
+}
+.vanity-sheet .v-cond-detail.combat { --cc:#8a2f2f; }
+.vanity-sheet .v-cond-detail.spell  { --cc:var(--v-teal); }
+.vanity-sheet .v-cond-detail.state  { --cc:var(--v-plum); }
+.vanity-sheet .v-cond-detail img { width: 40px; height: 40px; flex: none; }
+.vanity-sheet .v-cond-detail .cd-head { display: flex; align-items: baseline; gap: 8px; }
+.vanity-sheet .v-cond-detail .cd-name { font-family: "Cinzel", Georgia, serif; font-size: 14px; font-weight: 700; color: var(--cc); }
+.vanity-sheet .v-cond-detail .cd-state {
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--v-ink2);
+  border: 1px solid var(--v-line); border-radius: 8px; padding: 0 6px;
+}
+.vanity-sheet .v-cond-detail .cd-state.on { color: #fff; background: var(--cc); border-color: var(--cc); }
+.vanity-sheet .v-cond-detail .cd-rules { font-size: 13px; line-height: 1.4; margin: 3px 0; }
+.vanity-sheet .v-cond-detail .cd-ends { font-size: 12px; color: var(--v-ink2); font-style: italic; }
+.vanity-sheet .v-cond-detail .cd-ends b { font-style: normal; color: var(--cc); }
+.vanity-sheet .v-cond-active { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 2px 0; font-size: 12px; }
+.vanity-sheet .v-cond-active .ca-title {
+  font-family: "Cinzel", Georgia, serif; font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--v-ink2);
+}
+.vanity-sheet .v-cond-active .cond-read { cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.vanity-sheet .v-cond-active .cond-read.combat { color: #8a2f2f; }
+.vanity-sheet .v-cond-active .cond-read.spell { color: var(--v-teal-d); }
+.vanity-sheet .v-cond-active .cond-read.state { color: var(--v-plum); }
+
+/* Rich-text editors on sheets — no raw HTML markers in player text */
+.vanity-sheet .editor { min-height: 90px; position: relative; }
+.vanity-sheet .editor-content,
+.vanity-sheet .editor .journal-entry-content {
+  min-height: 84px;
+  padding: 6px 8px;
+  border: 1.4px solid var(--v-fieldline);
+  border-radius: 4px;
+  background: var(--v-paper2);
+  color: var(--v-ink);
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.vanity-sheet .editor-content p { margin: 0 0 6px; }
+.vanity-sheet .editor-content:focus { outline: none; border-color: var(--v-teal); }
+.vanity-sheet .editor a.editor-edit {
+  background: var(--v-teal);
+  color: var(--v-paper);
+  border-radius: 3px;
+}
+.vanity-sheet .editor .ProseMirror { color: var(--v-ink); min-height: 80px; }
+.vanity-sheet prose-mirror { display: block; min-height: 90px; }

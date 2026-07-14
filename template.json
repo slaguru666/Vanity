@@ -1,0 +1,101 @@
+{
+  "Actor": {
+    "types": ["character", "npc"],
+    "character": {
+      "attributes": {
+        "brawn": { "value": 2 },
+        "flair": { "value": 2 },
+        "wits":  { "value": 2 },
+        "poise": { "value": 2 }
+      },
+      "grit":   { "value": 8, "max": 8 },
+      "vanity": { "value": 3 },
+      "karma":  { "value": 0 },
+      "glory":  { "value": 0 },
+      "knacks": {
+        "fight":     { "rank": 0 },
+        "shoot":     { "rank": 0 },
+        "athletics": { "rank": 0 },
+        "stealth":   { "rank": 0 },
+        "notice":    { "rank": 0 },
+        "lore":      { "rank": 0 },
+        "survive":   { "rank": 0 },
+        "charm":     { "rank": 0 },
+        "command":   { "rank": 0 }
+      },
+      "locked": {
+        "name": "",
+        "attribute": "brawn",
+        "rank": 1
+      },
+      "details": {
+        "class": "",
+        "concept": "",
+        "fightingStyle": "",
+        "coin": { "cp": 0, "sp": 0, "gp": 15 }
+      },
+      "companion": {
+        "name": "",
+        "grit": { "value": 3, "max": 3 },
+        "pool": 3,
+        "notes": ""
+      },
+      "notes": "",
+      "biography": ""
+    },
+    "npc": {
+      "category": "mook",
+      "attack1": { "name": "Attack", "pool": 3, "note": "" },
+      "attack2": { "name": "", "pool": 0, "note": "" },
+      "defence": { "pool": 2, "note": "" },
+      "grit":    { "value": 1, "max": 1 },
+      "resolve": { "value": 0, "max": 0 },
+      "nerve": 2,
+      "trick": "",
+      "notes": ""
+    }
+  },
+  "Item": {
+    "types": ["weapon", "armour", "gear", "spell", "edge", "vice"],
+    "weapon": {
+      "dice": 0,
+      "hands": 1,
+      "group": "fight",
+      "properties": "",
+      "cost": "",
+      "description": ""
+    },
+    "armour": {
+      "defence": 1,
+      "kind": "armour",
+      "encumbrance": "",
+      "perk": "",
+      "equipped": true,
+      "cost": "",
+      "description": ""
+    },
+    "gear": {
+      "quantity": 1,
+      "slots": 1,
+      "consumable": false,
+      "cost": "",
+      "description": ""
+    },
+    "spell": {
+      "list": "arcane",
+      "threshold": 1,
+      "effect": "",
+      "scaling": "",
+      "spent": false,
+      "description": ""
+    },
+    "edge": {
+      "class": "",
+      "description": ""
+    },
+    "vice": {
+      "trigger": "",
+      "description": ""
+    }
+  }
+}

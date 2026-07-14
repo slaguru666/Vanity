@@ -1,0 +1,85 @@
+<form class="{{cssClass}} vanity-sheet npc" autocomplete="off">
+
+  <header class="v-head">
+    <img class="v-portrait" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" />
+    <div class="v-title">
+      <input class="v-name" name="name" type="text" value="{{actor.name}}" placeholder="Name" />
+      <div class="v-sub">
+        <select name="system.category">
+          {{#each categories}}<option value="{{@key}}" {{#if (eq @key ../sys.category)}}selected{{/if}}>{{this}}</option>{{/each}}
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <div class="npc-grid">
+    <div class="sect">
+      <div class="bar">Attack · click ⚔ to roll</div>
+      <div class="body">
+        <div class="npc-line">
+          <a class="npc-roll" data-roll="attack1" title="Roll"><i class="fa-solid fa-hand-fist"></i></a>
+          <input type="text" name="system.attack1.name" value="{{sys.attack1.name}}" placeholder="Attack" />
+          <input class="pool" type="number" name="system.attack1.pool" value="{{sys.attack1.pool}}" /><span class="d">d</span>
+          <input class="note" type="text" name="system.attack1.note" value="{{sys.attack1.note}}" placeholder="e.g. great-axe +2, Brutal" />
+        </div>
+        <div class="npc-line">
+          <a class="npc-roll" data-roll="attack2" title="Roll"><i class="fa-solid fa-hand-fist"></i></a>
+          <input type="text" name="system.attack2.name" value="{{sys.attack2.name}}" placeholder="Second attack (optional)" />
+          <input class="pool" type="number" name="system.attack2.pool" value="{{sys.attack2.pool}}" /><span class="d">d</span>
+          <input class="note" type="text" name="system.attack2.note" value="{{sys.attack2.note}}" placeholder="" />
+        </div>
+        <div class="npc-line">
+          <a class="npc-roll" data-roll="defence" title="Roll"><i class="fa-solid fa-shield-halved"></i></a>
+          <span class="lbl">Defence</span>
+          <input class="pool" type="number" name="system.defence.pool" value="{{sys.defence.pool}}" /><span class="d">d</span>
+          <input class="note" type="text" name="system.defence.note" value="{{sys.defence.note}}" placeholder="dodge / block, armour" />
+        </div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <div class="bar">Grit &amp; Nerve</div>
+      <div class="body">
+        <div class="npc-line">
+          <span class="lbl">Grit</span>
+          <input class="pool" type="number" name="system.grit.value" value="{{sys.grit.value}}" />
+          <span class="d">/</span>
+          <input class="pool" type="number" name="system.grit.max" value="{{sys.grit.max}}" />
+        </div>
+        <div class="npc-line">
+          <a class="npc-roll" data-roll="reaction" title="Reaction roll (§24): 2 dice ± approach — 0 Hostile · 1 Wary · 2 Neutral · 3+ Friendly"><i class="fa-solid fa-comments"></i></a>
+          <span class="lbl">Reaction</span>
+          <span class="hint">2d ± approach · roll on first meeting</span>
+        </div>
+        <div class="npc-line">
+          <a class="npc-roll" data-roll="morale" title="Morale check — 1 Success = they hold"><i class="fa-solid fa-flag"></i></a>
+          <span class="lbl">Nerve</span>
+          <input class="pool" type="number" name="system.nerve" value="{{sys.nerve}}" /><span class="d">d</span>
+          <span class="hint">rabble 2 · soldiers 3 · veterans 4 · fanatics 5</span>
+        </div>
+        {{#if isNemesis}}
+        <div class="npc-line nemesis">
+          <span class="lbl">Resolve</span>
+          <input class="pool" type="number" name="system.resolve.value" value="{{sys.resolve.value}}" />
+          <span class="d">/</span>
+          <input class="pool" type="number" name="system.resolve.max" value="{{sys.resolve.max}}" />
+          <span class="hint">two actions/round · cap single hits at 4 · phase at half Grit</span>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+
+  <div class="sect">
+    <div class="bar">The Trick — what makes them memorable</div>
+    <div class="body">
+      <input type="text" name="system.trick" value="{{sys.trick}}" placeholder="Pack tactics: +1 die when flanking…" />
+    </div>
+  </div>
+
+  <div class="sect">
+    <div class="bar">Notes</div>
+    <div class="body">{{editor notesHTML target="system.notes" button=true editable=editable engine="prosemirror" collaborate=false}}</div>
+  </div>
+
+</form>

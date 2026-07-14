@@ -1,0 +1,118 @@
+{
+  "id": "vanity",
+  "title": "VANITY — the Vanity Role-Playing Game",
+  "description": "A generic d6 RPG where ego is a resource and the universe keeps score. Pool = Attribute + Knack + situation; 5–6 = a Success; fail with two 1s = a Stumble that banks a Bane of Karma (Draft 13). No hit points — Grit. Vanity, Karma and Glory drive play. Includes the full Draft 13 rulebook, all spells and gear, the starter bestiary, five ready-to-play characters and the one-shot adventure The Vain Crown.",
+  "version": "0.9.0",
+  "compatibility": {
+    "minimum": 13,
+    "verified": "14.364"
+  },
+  "authors": [
+    {
+      "name": "Tim Evans (slaguru666)"
+    }
+  ],
+  "esmodules": [
+    "vanity.mjs"
+  ],
+  "styles": [
+    "styles/vanity.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "socket": false,
+  "initiative": "1d6",
+  "grid": {
+    "distance": 5,
+    "units": "ft"
+  },
+  "primaryTokenAttribute": "grit",
+  "secondaryTokenAttribute": null,
+  "packs": [
+    {
+      "name": "weapons",
+      "label": "VANITY · Weapons",
+      "path": "packs/weapons",
+      "type": "Item",
+      "system": "vanity"
+    },
+    {
+      "name": "armour",
+      "label": "VANITY · Armour & Shields",
+      "path": "packs/armour",
+      "type": "Item",
+      "system": "vanity"
+    },
+    {
+      "name": "gear",
+      "label": "VANITY · Gear & Consumables",
+      "path": "packs/gear",
+      "type": "Item",
+      "system": "vanity"
+    },
+    {
+      "name": "spells",
+      "label": "VANITY · Spells & Nature Tricks",
+      "path": "packs/spells",
+      "type": "Item",
+      "system": "vanity"
+    },
+    {
+      "name": "edges",
+      "label": "VANITY · Class Edges",
+      "path": "packs/edges",
+      "type": "Item",
+      "system": "vanity"
+    },
+    {
+      "name": "vices",
+      "label": "VANITY · Vices",
+      "path": "packs/vices",
+      "type": "Item",
+      "system": "vanity"
+    },
+    {
+      "name": "bestiary",
+      "label": "VANITY · Bestiary",
+      "path": "packs/bestiary",
+      "type": "Actor",
+      "system": "vanity"
+    },
+    {
+      "name": "pregens",
+      "label": "VANITY · Ready-to-Play Characters",
+      "path": "packs/pregens",
+      "type": "Actor",
+      "system": "vanity"
+    },
+    {
+      "name": "rules",
+      "label": "VANITY · Rulebook (Draft 10)",
+      "path": "packs/rules",
+      "type": "JournalEntry",
+      "system": "vanity"
+    },
+    {
+      "name": "gm",
+      "label": "VANITY · GM Screen & The Vain Crown",
+      "path": "packs/gm",
+      "type": "JournalEntry",
+      "system": "vanity"
+    },
+    {
+      "name": "tables",
+      "label": "VANITY · Roll Tables",
+      "path": "packs/tables",
+      "type": "RollTable",
+      "system": "vanity"
+    }
+  ],
+  "manifest": "https://raw.githubusercontent.com/slaguru666/vanity/main/system.json",
+  "download": "https://github.com/slaguru666/vanity/archive/refs/heads/main.zip",
+  "url": "https://github.com/slaguru666/vanity"
+}

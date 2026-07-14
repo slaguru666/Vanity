@@ -1,0 +1,74 @@
+<form class="{{cssClass}} vanity-sheet item" autocomplete="off">
+
+  <header class="v-head">
+    <img class="v-portrait" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
+    <div class="v-title">
+      <input class="v-name" name="name" type="text" value="{{item.name}}" placeholder="Name" />
+      <div class="v-sub"><span class="typetag">{{localize (concat "TYPES.Item." item.type)}}</span></div>
+    </div>
+  </header>
+
+  <div class="sect">
+    <div class="bar">Details</div>
+    <div class="body item-fields">
+
+      {{#if (eq item.type "weapon")}}
+      <label class="f"><span class="cap">Attack dice</span><input type="number" name="system.dice" value="{{sys.dice}}" /></label>
+      <label class="f"><span class="cap">Hands</span><input type="number" name="system.hands" value="{{sys.hands}}" min="1" max="2" /></label>
+      <label class="f"><span class="cap">Attack with</span>
+        <select name="system.group">
+          <option value="fight" {{#if (eq sys.group "fight")}}selected{{/if}}>Fight (Brawn)</option>
+          <option value="shoot" {{#if (eq sys.group "shoot")}}selected{{/if}}>Shoot (Flair)</option>
+        </select></label>
+      <label class="f wide"><span class="cap">Properties</span><input type="text" name="system.properties" value="{{sys.properties}}" placeholder="Light · Reach · Brutal · Armour-Piercing · Two-Handed…" /></label>
+      <label class="f"><span class="cap">Cost</span><input type="text" name="system.cost" value="{{sys.cost}}" /></label>
+      {{/if}}
+
+      {{#if (eq item.type "armour")}}
+      <label class="f"><span class="cap">Defence dice</span><input type="number" name="system.defence" value="{{sys.defence}}" /></label>
+      <label class="f"><span class="cap">Kind</span>
+        <select name="system.kind">
+          <option value="armour" {{#if (eq sys.kind "armour")}}selected{{/if}}>Armour</option>
+          <option value="shield" {{#if (eq sys.kind "shield")}}selected{{/if}}>Shield</option>
+        </select></label>
+      <label class="f"><span class="cap">Equipped</span><input type="checkbox" name="system.equipped" {{checkedIf sys.equipped}} /></label>
+      <label class="f wide"><span class="cap">Encumbrance</span><input type="text" name="system.encumbrance" value="{{sys.encumbrance}}" placeholder="−1 Stealth &amp; Athletics…" /></label>
+      <label class="f wide"><span class="cap">Tier perk</span><input type="text" name="system.perk" value="{{sys.perk}}" placeholder="negates the Wound maneuver…" /></label>
+      <label class="f"><span class="cap">Cost</span><input type="text" name="system.cost" value="{{sys.cost}}" /></label>
+      {{/if}}
+
+      {{#if (eq item.type "gear")}}
+      <label class="f"><span class="cap">Quantity</span><input type="number" name="system.quantity" value="{{sys.quantity}}" /></label>
+      <label class="f"><span class="cap">Slots</span><input type="number" name="system.slots" value="{{sys.slots}}" /></label>
+      <label class="f"><span class="cap">Consumable</span><input type="checkbox" name="system.consumable" {{checkedIf sys.consumable}} /></label>
+      <label class="f"><span class="cap">Cost</span><input type="text" name="system.cost" value="{{sys.cost}}" /></label>
+      {{/if}}
+
+      {{#if (eq item.type "spell")}}
+      <label class="f"><span class="cap">List</span>
+        <select name="system.list">
+          {{#each spellLists}}<option value="{{@key}}" {{#if (eq @key ../sys.list)}}selected{{/if}}>{{this.label}}</option>{{/each}}
+        </select></label>
+      <label class="f"><span class="cap">Threshold</span><input type="number" name="system.threshold" value="{{sys.threshold}}" min="1" max="3" /></label>
+      <label class="f"><span class="cap">Spent</span><input type="checkbox" name="system.spent" {{checkedIf sys.spent}} /></label>
+      <label class="f wide"><span class="cap">Effect</span><input type="text" name="system.effect" value="{{sys.effect}}" /></label>
+      <label class="f wide"><span class="cap">Scaling</span><input type="text" name="system.scaling" value="{{sys.scaling}}" /></label>
+      {{/if}}
+
+      {{#if (eq item.type "edge")}}
+      <label class="f wide"><span class="cap">Class</span><input type="text" name="system.class" value="{{sys.class}}" placeholder="Warrior · Rogue · Ranger · Mage · Cleric" /></label>
+      {{/if}}
+
+      {{#if (eq item.type "vice")}}
+      <label class="f wide"><span class="cap">The itch — example trigger</span><input type="text" name="system.trigger" value="{{sys.trigger}}" /></label>
+      {{/if}}
+
+    </div>
+  </div>
+
+  <div class="sect">
+    <div class="bar">Description</div>
+    <div class="body">{{editor descriptionHTML target="system.description" button=true editable=editable engine="prosemirror" collaborate=false}}</div>
+  </div>
+
+</form>

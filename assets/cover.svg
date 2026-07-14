@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="85%">
+      <stop offset="0%" stop-color="#1d4a45"/>
+      <stop offset="55%" stop-color="#122f2c"/>
+      <stop offset="100%" stop-color="#0a1a18"/>
+    </radialGradient>
+    <radialGradient id="eye" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#e0c98a"/>
+      <stop offset="45%" stop-color="#14544e"/>
+      <stop offset="78%" stop-color="#1c3f66"/>
+      <stop offset="100%" stop-color="#6a3b5e"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0c98a"/>
+      <stop offset="45%" stop-color="#b0872f"/>
+      <stop offset="100%" stop-color="#8a6a20"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.85  0 0 0 0 0.7  0 0 0 0.05 0"/>
+      <feComposite operator="over" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)"/>
+
+  <!-- faint ring -->
+  <circle cx="600" cy="380" r="290" fill="none" stroke="#b0872f" stroke-opacity="0.18" stroke-width="2"/>
+  <circle cx="600" cy="380" r="272" fill="none" stroke="#b0872f" stroke-opacity="0.10" stroke-width="1"/>
+
+  <!-- peacock plumes -->
+  <g filter="url(#glow)">
+    <g stroke="#14544e" stroke-width="3" fill="none" opacity="0.9">
+      <path d="M600 430 C520 360 480 300 470 210"/>
+      <path d="M600 430 C680 360 720 300 730 210"/>
+      <path d="M600 420 C560 330 545 270 545 170"/>
+      <path d="M600 420 C640 330 655 270 655 170"/>
+      <path d="M600 415 C600 320 600 240 600 140"/>
+    </g>
+    <ellipse cx="470" cy="205" rx="34" ry="46" fill="url(#eye)"/>
+    <ellipse cx="545" cy="165" rx="34" ry="46" fill="url(#eye)"/>
+    <ellipse cx="600" cy="135" rx="36" ry="50" fill="url(#eye)"/>
+    <ellipse cx="655" cy="165" rx="34" ry="46" fill="url(#eye)"/>
+    <ellipse cx="730" cy="205" rx="34" ry="46" fill="url(#eye)"/>
+    <ellipse cx="470" cy="200" rx="12" ry="17" fill="#1c3f66"/>
+    <ellipse cx="545" cy="160" rx="12" ry="17" fill="#1c3f66"/>
+    <ellipse cx="600" cy="129" rx="13" ry="19" fill="#1c3f66"/>
+    <ellipse cx="655" cy="160" rx="12" ry="17" fill="#1c3f66"/>
+    <ellipse cx="730" cy="200" rx="12" ry="17" fill="#1c3f66"/>
+    <ellipse cx="470" cy="197" rx="5" ry="7" fill="#e0c98a"/>
+    <ellipse cx="545" cy="157" rx="5" ry="7" fill="#e0c98a"/>
+    <ellipse cx="600" cy="125" rx="5.5" ry="8" fill="#e0c98a"/>
+    <ellipse cx="655" cy="157" rx="5" ry="7" fill="#e0c98a"/>
+    <ellipse cx="730" cy="197" rx="5" ry="7" fill="#e0c98a"/>
+  </g>
+
+  <!-- the crown -->
+  <g filter="url(#glow)">
+    <path d="M440 470 L470 380 L530 445 L600 355 L670 445 L730 380 L760 470 Z"
+          fill="url(#gold)" stroke="#8a6a20" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="436" y="470" width="328" height="46" rx="8" fill="url(#gold)" stroke="#8a6a20" stroke-width="4"/>
+    <circle cx="470" cy="376" r="12" fill="#e0c98a" stroke="#8a6a20" stroke-width="3"/>
+    <circle cx="600" cy="350" r="14" fill="#e0c98a" stroke="#8a6a20" stroke-width="3"/>
+    <circle cx="730" cy="376" r="12" fill="#e0c98a" stroke="#8a6a20" stroke-width="3"/>
+    <circle cx="510" cy="493" r="9" fill="#14544e" stroke="#0e3f3a" stroke-width="2"/>
+    <circle cx="600" cy="493" r="11" fill="#6a3b5e" stroke="#4d2a44" stroke-width="2"/>
+    <circle cx="690" cy="493" r="9" fill="#14544e" stroke="#0e3f3a" stroke-width="2"/>
+  </g>
+
+  <!-- title -->
+  <text x="600" y="640" text-anchor="middle" fill="#f7f0de"
+        font-family="Cinzel, Trajan Pro, Georgia, serif" font-size="110" font-weight="700"
+        letter-spacing="26">VANITY</text>
+  <rect x="420" y="672" width="360" height="3" fill="#b0872f"/>
+  <text x="600" y="716" text-anchor="middle" fill="#b0872f"
+        font-family="Cinzel, Georgia, serif" font-size="26" letter-spacing="12">THE VAIN CROWN</text>
+  <text x="600" y="790" text-anchor="middle" fill="#c9bfa4"
+        font-family="EB Garamond, Georgia, serif" font-size="24" font-style="italic">“Be vain and you shine — but the brighter you burn, the bigger the bill.”</text>
+
+  <rect width="1200" height="900" filter="url(#grain)" opacity="0.5" fill="none"/>
+</svg>

@@ -1,0 +1,330 @@
+<form class="{{cssClass}} vanity-sheet" autocomplete="off">
+
+  {{!-- Header --}}
+  <header class="v-head">
+    <img class="v-portrait" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" />
+    <div class="v-title">
+      <input class="v-name" name="name" type="text" value="{{actor.name}}" placeholder="Name" />
+      <div class="v-sub">
+        <input name="system.details.class" type="text" value="{{sys.details.class}}" placeholder="Class" />
+        <span>·</span>
+        <input name="system.details.concept" type="text" value="{{sys.details.concept}}" placeholder="Concept" />
+      </div>
+    </div>
+    <div class="v-motto">“Be vain and you shine —<br>but the brighter you burn, the bigger the bill.”</div>
+  </header>
+
+  {{#if sys.takenOut}}<div class="v-banner out">TAKEN OUT — the fiction decides how badly</div>
+  {{else if sys.rattled}}<div class="v-banner rattled">RATTLED — −1 die on everything until you recover</div>{{/if}}
+  {{#if sys.reckoning}}<div class="v-banner reckoning">SIX BANES — THE RECKONING IS DUE</div>{{/if}}
+
+  {{!-- Conditions strip — grouped icon chips, always visible, click to toggle & read below --}}
+  <div class="v-conditions">
+    {{#each conditionGroups}}
+    <div class="cond-group {{group}}">
+      {{#each items}}
+      <span class="cond-badge {{../group}} {{#if active}}on{{/if}}" data-cond="{{id}}" title="{{name}} — {{short}} · ends: {{ends}}">
+        <img src="{{img}}" alt=""><span class="cond-name">{{name}}</span>
+      </span>
+      {{/each}}
+    </div>
+    {{/each}}
+  </div>
+
+  <nav class="sheet-tabs tabs" data-group="primary">
+    <a class="item" data-tab="main">Character</a>
+    <a class="item" data-tab="combat">Combat &amp; Gear</a>
+    {{#if hasSpells}}<a class="item" data-tab="magic">Magic</a>{{/if}}
+    <a class="item" data-tab="story">Story</a>
+  </nav>
+
+  <section class="sheet-body">
+
+    {{!-- ============ TAB: CHARACTER ============ --}}
+    <div class="tab" data-tab="main" data-group="primary">
+      <div class="v-cols">
+        <div>
+          <div class="sect">
+            <div class="bar">Attributes · click to roll · right-click to save</div>
+            <div class="body">
+              {{#each attributes}}
+              <div class="attr" data-attr="{{key}}">
+                <div class="num" title="Roll {{label}}">{{value}}</div>
+                <div class="meta">
+                  <div class="nm">{{label}}</div>
+                  <div class="ds">{{desc}}</div>
+                </div>
+                <input class="attr-input" type="number" name="system.attributes.{{key}}.value" value="{{value}}" min="1" max="5" />
+              </div>
+              {{/each}}
+              <div class="hint">Pool = Attribute + Knack + situation. 5–6 = a Success. Fail with two 1s = a Stumble (1 Bane).</div>
+            </div>
+          </div>
+
+          <div class="sect">
+            <div class="bar">Grit · staying power</div>
+            <div class="body">
+              <div class="grit-row">
+                <label class="mini">Current <input type="number" name="system.grit.value" value="{{sys.grit.value}}" min="0" /></label>
+                <label class="mini">Max <input type="number" name="system.grit.max" value="{{sys.grit.max}}" min="1" max="14" /></label>
+              </div>
+              <div class="track">
+                {{#each gritCells}}
+                <div class="grit-cell cell {{#if filled}}filled{{/if}} {{#if half}}half{{/if}}" data-i="{{i}}"><span>{{i}}</span></div>
+                {{/each}}
+              </div>
+              <div class="hint">Half lost = Rattled (−1 die). Emptied = Taken Out. Refuse to Fall: 1 Vanity → stop at 1 Grit (+2 Banes).</div>
+            </div>
+          </div>
+
+          <div class="sect">
+            <div class="bar">Vanity · Karma · Glory</div>
+            <div class="body">
+              <div class="resrow">
+                <span class="rl v">Vanity</span>
+                <div class="pips">
+                  {{#each vanityPips}}<i class="pip pip-btn {{#if filled}}filled{{/if}}" data-res="vanity" data-i="{{i}}"></i>{{/each}}
+                </div>
+              </div>
+              <div class="resnote">Start 3. Spend: +1 die · go first · Refuse to Fall.</div>
+              <div class="resrow">
+                <span class="rl k">Banes</span>
+                <div class="pips">
+                  {{#each karmaPips}}<i class="pip hex pip-btn {{#if filled}}filled{{/if}}" data-res="karma" data-i="{{i}}"></i>{{/each}}
+                </div>
+              </div>
+              <div class="resnote">Gain: Stumble · Push · Refuse to Fall · your Vice. 6 → THE RECKONING (2d6, §21b). Clear by humility &amp; rest.</div>
+              <div class="resrow glory">
+                <span class="rl">Glory</span>
+                <input type="number" name="system.glory" value="{{sys.glory}}" min="0" />
+                <span class="resnote">1–3 per session · spend between sessions to advance</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sect">
+            <div class="bar">Knacks · click name to roll · click rank to train</div>
+            <div class="body">
+              {{#each knacks}}
+              <div class="knack-row" data-knack="{{key}}">
+                <span class="kn" title="Roll {{attrLabel}} + {{label}}">{{label}} <em>{{attrLabel}}</em></span>
+                <span class="pool">{{pool}}d</span>
+                <span class="rank r{{rank}}" title="{{rankLabel}}">
+                  <i class="ck {{#if (gt rank 0)}}on{{/if}}"></i><i class="ck {{#if (gt rank 1)}}on{{/if}}"></i>
+                </span>
+              </div>
+              {{/each}}
+
+              <div class="locked">
+                <div class="t">Locked Knack — your class key</div>
+                <div class="locked-row">
+                  <select name="system.locked.name">
+                    <option value=""></option>
+                    {{#each lockedNames}}<option value="{{this}}" {{#if (eq this ../sys.locked.name)}}selected{{/if}}>{{this}}</option>{{/each}}
+                  </select>
+                  <select name="system.locked.attribute">
+                    {{#each lockedAttrs}}<option value="{{this}}" {{#if (eq this ../sys.locked.attribute)}}selected{{/if}}>{{this}}</option>{{/each}}
+                  </select>
+                  <select name="system.locked.rank" data-dtype="Number">
+                    {{#each rankOptions}}{{#if @index}}<option value="{{@index}}" {{#if (eq @index ../sys.locked.rank)}}selected{{/if}}>{{this}}</option>{{/if}}{{/each}}
+                  </select>
+                  <button type="button" class="locked-roll" title="Roll the Locked Knack"><i class="fa-solid fa-dice-d6"></i> {{lockedPool}}d</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sect">
+            <div class="bar">Vice — your vanity flaw</div>
+            <div class="body">
+              {{#each vices}}
+              <div class="item-row" data-item-id="{{id}}">
+                <span class="item-name">{{name}}</span>
+                <span class="item-note">{{system.trigger}}</span>
+                <button type="button" class="vice-play" title="Play your Vice: +1 Vanity now, the GM banks a Bane for later">Play it</button>
+                <a class="item-edit" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                <a class="item-delete" title="Delete"><i class="fa-solid fa-trash"></i></a>
+              </div>
+              {{/each}}
+              {{#unless vices.length}}<div class="hint">Drag a Vice from the compendium, or <a class="item-create" data-type="vice">create one</a>. Playing it earns +1 Vanity now — and the GM a Bane for later.</div>{{/unless}}
+            </div>
+          </div>
+
+          <div class="sect">
+            <div class="bar">Class Edges</div>
+            <div class="body">
+              {{#each edges}}
+              <div class="item-row" data-item-id="{{id}}">
+                <span class="item-name">{{name}}</span>
+                <a class="item-edit" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                <a class="item-delete" title="Delete"><i class="fa-solid fa-trash"></i></a>
+              </div>
+              {{/each}}
+              <div class="hint"><a class="item-create" data-type="edge">Add an edge</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{!-- ============ TAB: COMBAT & GEAR ============ --}}
+    <div class="tab" data-tab="combat" data-group="primary">
+      <div class="v-quickbar">
+        <button type="button" class="roll-draw"><i class="fa-solid fa-bolt"></i> The Draw (1d6)</button>
+        <button type="button" class="roll-dodge"><i class="fa-solid fa-person-running"></i> Dodge {{sys.dodgePool}}d</button>
+        <button type="button" class="roll-block"><i class="fa-solid fa-shield-halved"></i> Block {{sys.blockPool}}d</button>
+        <button type="button" class="refuse-fall" title="A blow would empty your Grit: spend 1 Vanity to stop at 1 Grit (+2 Banes)"><i class="fa-solid fa-hand"></i> Refuse to Fall</button>
+      </div>
+      <div class="v-quickbar">
+        <button type="button" class="rest-breather" title="A quiet scene: recover 2 Grit"><i class="fa-solid fa-lungs"></i> Breather (+2 Grit)</button>
+        <button type="button" class="rest-full" title="A proper rest: all Grit, clear 1 Bane, recover spent spells"><i class="fa-solid fa-bed"></i> Proper Rest</button>
+      </div>
+
+      <div class="sect">
+        <div class="bar">Weapons · click ⚔ to attack</div>
+        <div class="body">
+          <table class="v-table">
+            <thead><tr><th></th><th>Weapon</th><th>Dice</th><th>Properties</th><th class="ctrl"></th></tr></thead>
+            <tbody>
+              {{#each weapons}}
+              <tr data-item-id="{{id}}">
+                <td class="ctrl"><a class="item-attack" title="Attack"><i class="fa-solid fa-hand-fist"></i></a></td>
+                <td class="item-name">{{name}}</td>
+                <td>+{{system.dice}}</td>
+                <td class="props">{{system.properties}}</td>
+                <td class="ctrl"><a class="item-edit"><i class="fa-solid fa-pen"></i></a> <a class="item-delete"><i class="fa-solid fa-trash"></i></a></td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+          <div class="hint"><a class="item-create" data-type="weapon">Add a weapon</a> · net 1 = 1 Grit; each extra Success = +1 damage or a Special Attack.</div>
+          <label class="f"><span class="cap">Fighting style</span>
+            <input type="text" name="system.details.fightingStyle" value="{{sys.details.fightingStyle}}" placeholder="Sword &amp; Shield · Two-Weapon · Two-Handed · Ranged" /></label>
+        </div>
+      </div>
+
+      <div class="v-cols">
+        <div class="sect">
+          <div class="bar">Armour &amp; Defence</div>
+          <div class="body">
+            {{#each armour}}
+            <div class="item-row" data-item-id="{{id}}">
+              <a class="item-equip" title="Toggle equipped"><i class="fa-solid {{#if system.equipped}}fa-circle-check{{else}}fa-circle{{/if}}"></i></a>
+              <span class="item-name {{#unless system.equipped}}unequipped{{/unless}}">{{name}}</span>
+              <span class="item-note">+{{system.defence}} {{system.kind}}{{#if system.perk}} · {{system.perk}}{{/if}}</span>
+              <a class="item-edit"><i class="fa-solid fa-pen"></i></a>
+              <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
+            </div>
+            {{/each}}
+            <div class="hint"><a class="item-create" data-type="armour">Add armour</a> · Defend with Flair (dodge) or Brawn (block) + armour + shield. Armour never stops spells.</div>
+          </div>
+        </div>
+
+        <div class="sect">
+          <div class="bar">Gear · Load {{slotsUsed}} / {{sys.load}}</div>
+          <div class="body">
+            {{#each gear}}
+            <div class="item-row" data-item-id="{{id}}">
+              <span class="item-name">{{name}}</span>
+              <span class="item-note">{{#if (gt system.quantity 1)}}×{{system.quantity}}{{/if}}</span>
+              <a class="item-edit"><i class="fa-solid fa-pen"></i></a>
+              <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
+            </div>
+            {{/each}}
+            <div class="hint"><a class="item-create" data-type="gear">Add gear</a></div>
+            <div class="coin-row">
+              <span class="cap">Coin</span>
+              <label>gp <input type="number" name="system.details.coin.gp" value="{{sys.details.coin.gp}}" /></label>
+              <label>sp <input type="number" name="system.details.coin.sp" value="{{sys.details.coin.sp}}" /></label>
+              <label>cp <input type="number" name="system.details.coin.cp" value="{{sys.details.coin.cp}}" /></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref">
+        <h3>Special Attacks — spend net Successes</h3>
+        <div class="two">
+          <div><b>1</b>&nbsp; Disarm · Knock Down · Drive Back · Wound · Feint · Grapple · Find the Gap · Called Shot</div>
+          <div><b>2</b>&nbsp; Sunder · Cleave · Off-Balance (−2 dice) · Press (extra attack) · Environment</div>
+        </div>
+      </div>
+    </div>
+
+    {{!-- ============ TAB: MAGIC ============ --}}
+    {{#if hasSpells}}
+    <div class="tab" data-tab="magic" data-group="primary">
+      <div class="sect">
+        <div class="bar">Spells &amp; Nature Tricks · Threshold 1·2·3</div>
+        <div class="body">
+          <table class="v-table">
+            <thead><tr><th></th><th>Spell</th><th>Thr</th><th>Effect · scaling</th><th class="ctrl"></th></tr></thead>
+            <tbody>
+              {{#each spells}}
+              <tr data-item-id="{{item.id}}" class="{{#if item.system.spent}}spent{{/if}}">
+                <td class="ctrl"><a class="item-cast" title="Cast"><i class="fa-solid fa-wand-sparkles"></i></a></td>
+                <td class="item-name">{{item.name}} <em class="listtag">{{listLabel}}</em></td>
+                <td>{{item.system.threshold}}</td>
+                <td class="props">{{item.system.effect}}{{#if item.system.scaling}} · <em>{{item.system.scaling}}</em>{{/if}}</td>
+                <td class="ctrl">
+                  <a class="item-spent" title="Toggle spent"><i class="fa-solid {{#if item.system.spent}}fa-battery-empty{{else}}fa-battery-full{{/if}}"></i></a>
+                  <a class="item-edit"><i class="fa-solid fa-pen"></i></a>
+                  <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
+                </td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+          <div class="hint"><a class="item-create" data-type="spell">Add a spell</a> · Meet the Threshold → works &amp; stays. Short → Fizzle (spent) or Push (+1 Bane); a failed Push = Catastrophe. Repeats in a scene raise the Threshold.</div>
+        </div>
+      </div>
+    </div>
+    {{/if}}
+
+    {{!-- ============ TAB: STORY ============ --}}
+    <div class="tab" data-tab="story" data-group="primary">
+      <div class="sect">
+        <div class="bar">Companion</div>
+        <div class="body companion-grid">
+          <label class="f"><span class="cap">Name</span><input type="text" name="system.companion.name" value="{{sys.companion.name}}" placeholder="Ash the hawk…" /></label>
+          <label class="f"><span class="cap">Pool</span><input type="number" name="system.companion.pool" value="{{sys.companion.pool}}" /></label>
+          <label class="f"><span class="cap">Grit</span><input type="number" name="system.companion.grit.value" value="{{sys.companion.grit.value}}" /> / <input type="number" name="system.companion.grit.max" value="{{sys.companion.grit.max}}" /></label>
+          <button type="button" class="companion-roll" title="Roll the companion's pool"><i class="fa-solid fa-paw"></i> Roll</button>
+          <label class="f wide"><span class="cap">Notes (Help · Harry · Guard — Downed at 0 Grit, not dead)</span><input type="text" name="system.companion.notes" value="{{sys.companion.notes}}" /></label>
+        </div>
+      </div>
+      <div class="sect">
+        <div class="bar">Notes</div>
+        <div class="body">{{editor notesHTML target="system.notes" button=true editable=editable engine="prosemirror" collaborate=false}}</div>
+      </div>
+      <div class="sect">
+        <div class="bar">Biography</div>
+        <div class="body">{{editor bioHTML target="system.biography" button=true editable=editable engine="prosemirror" collaborate=false}}</div>
+      </div>
+    </div>
+
+  </section>
+
+  {{!-- Conditions in play — pinned to the foot of the sheet, across every tab --}}
+  {{#if focusCond}}
+  <div class="v-cond-detail {{focusCond.group}}">
+    <img src="{{focusCond.img}}" alt="">
+    <div class="cd-body">
+      <div class="cd-head"><span class="cd-name">{{focusCond.name}}</span>
+        <span class="cd-state {{#if focusCond.active}}on{{/if}}">{{#if focusCond.active}}active{{else}}not active{{/if}}</span></div>
+      <div class="cd-rules">{{{focusCond.rules}}}</div>
+      <div class="cd-ends"><b>Ends:</b> {{focusCond.ends}}</div>
+    </div>
+  </div>
+  {{/if}}
+  {{#if activeConditions.length}}
+  <div class="v-cond-active">
+    <span class="ca-title">In play:</span>
+    {{#each activeConditions}}
+    <a class="cond-read {{group}}" data-cond="{{id}}">{{name}}</a>
+    {{/each}}
+  </div>
+  {{/if}}
+</form>
