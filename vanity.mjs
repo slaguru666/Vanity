@@ -353,10 +353,18 @@ function renderRollCard({ label, sublabel, results, threshold, pushed, context, 
  * Roll a VANITY pool and post the chat card.
  * options: { threshold, context ("spell"|"attack"|...), spellUuid, sublabel }
  */
+/** Stamp the VANITY dice appearance on a roll so it shows the peacock dice regardless
+ *  of the player's own Dice So Nice settings (belt-and-suspenders with the roll hook). */
+function lockVanityDice(roll, colorset = "vanity") {
+  for (const die of roll.dice) die.options.appearance = { system: "vanity", colorset };
+  return roll;
+}
+
 async function rollPool(actor, pool, label, options = {}) {
   pool = Math.max(1, Math.floor(pool));
   const roll = new Roll(`${pool}d6`);
   await roll.evaluate();
+  lockVanityDice(roll);
   const results = roll.dice[0].results.map(r => r.result);
 
   // The Stumble (Draft 11): bank 1 Bane only on a failed roll with two or more 1s.
@@ -463,6 +471,7 @@ async function handlePush(message) {
   if (rerollCount > 0) {
     roll = new Roll(`${rerollCount}d6`);
     await roll.evaluate();
+    lockVanityDice(roll);
     newResults = keep.concat(roll.dice[0].results.map(r => r.result));
     if (game.dice3d) await game.dice3d.showForRoll(roll, game.user, true);
   }
@@ -947,7 +956,9 @@ class VanityItemSheet extends foundry.appv1.sheets.ItemSheet {
 /* -------------------------------------------- */
 
 Hooks.once("diceSoNiceReady", dice3d => {
-  dice3d.addSystem({ id: "vanity", name: "VANITY — Peacock & Gold" }, "preferred");
+  // "force" locks the VANITY dice system (the custom plume/crown/Bane faces) on for
+  // every player, overriding whatever dice they picked personally.
+  dice3d.addSystem({ id: "vanity", name: "VANITY — Peacock & Gold" }, "force");
 
   dice3d.addColorset({
     name: "vanity",
@@ -990,6 +1001,18 @@ Hooks.once("diceSoNiceReady", dice3d => {
   }, "default");
 });
 
+// Lock the VANITY colours onto every die of every roll, whatever the player's own
+// Dice So Nice settings. Fires for pool rolls, Pushes, initiative and manual rolls
+// alike. Dice already flagged as the blood-red Bane set are left untouched.
+Hooks.on("diceSoNiceRollStart", (messageId, context) => {
+  const roll = context?.roll;
+  if (!roll?.dice) return;
+  for (const die of roll.dice) {
+    if (die.options?.appearance?.colorset === "vanity-bane") continue;
+    die.options.appearance = { system: "vanity", colorset: "vanity" };
+  }
+});
+
 /* -------------------------------------------- */
 /*  Twist the Knife — the GM spends the tab      */
 /* -------------------------------------------- */
@@ -1008,7 +1031,7 @@ async function getVanityTable(name) {
 
 /** Roll dice on the playing surface in the blood-red Bane set, without ever blocking. */
 async function showBaneDice(roll) {
-  for (const d of roll.dice) d.options.appearance = { colorset: "vanity-bane" };
+  for (const d of roll.dice) d.options.appearance = { system: "vanity", colorset: "vanity-bane" };
   if (game.dice3d && !game.settings.get("dice-so-nice", "animateRollTable")) {
     await Promise.race([
       game.dice3d.showForRoll(roll, game.user, true).catch(() => {}),
@@ -1050,8 +1073,9 @@ async function reckoningNow({ actorUuid = "" } = {}) {
 
 /**
  * GM-only: roll the d66 on Twist the Knife with the blood-red Bane dice.
- * A paid twist (actorUuid set) deducts the row's Bane cost from the tab.
- * A free twist (lone unbanked 1) burns the button on its source card.
+ * The twist is the Bane's BITE, not its price — it never reduces the tab. A banked
+ * Bane stays put (building toward the Reckoning) and only clears through humility,
+ * a rest, or the Reckoning at six. A free twist (lone unbanked 1) burns its button.
  */
 async function twistTheKnife({ actorUuid = "", free = false, sourceMessage = null } = {}) {
   if (!game.user.isGM) return ui.notifications.warn("Only the GM may twist the knife.");
@@ -1067,15 +1091,14 @@ async function twistTheKnife({ actorUuid = "", free = false, sourceMessage = nul
   await table.toMessage(results, { roll });
   const draw = { roll, results };
 
+  // The twist bites, but the tab holds — a banked Bane is never spent by twisting.
   if (!free && actorUuid) {
     const actor = await fromUuid(actorUuid);
     if (actor?.type === "character") {
-      const cost = draw.roll.total >= 61 ? 2 : 1;
-      const karma = Math.max(0, (actor.system.karma ?? 0) - cost);
-      await actor.update({ "system.karma": karma });
+      const karma = actor.system.karma ?? 0;
       await ChatMessage.create({
         speaker: { alias: "The Tab" },
-        content: `<div class="vanity-roll vanity-tab-note"><p><b>${cost} Bane${cost > 1 ? "s" : ""} spent</b> against ${actor.name} — the tab now reads <b>${karma}</b> of 6.</p></div>`
+        content: `<div class="vanity-roll vanity-tab-note"><p>The knife twists — but the Bane stays banked. ${actor.name}'s tab still reads <b>${karma}</b> of 6.</p></div>`
       });
     }
   }
@@ -1501,16 +1524,16 @@ const FORGE_HOOKS = [
 ];
 
 const HOARDS = {
-  pocket: { label: "Pocket",  coin: () => `${sum(rollDice(2, 6))} sp`,            draws: 0, consum: 0.3, trinkets: [0, 1], hook: 0.15 },
-  cache:  { label: "Cache",   coin: () => `${sum(rollDice(1, 6))} gp, ${sum(rollDice(2, 6))} sp`, draws: 1, consum: 0.8, trinkets: [0, 1], hook: 0.3 },
-  chest:  { label: "Chest",   coin: () => `${sum(rollDice(4, 6))} gp`,            draws: 2, consum: 1, trinkets: [1, 1], hook: 0.5 },
-  vault:  { label: "Vault",   coin: () => `${sum(rollDice(2, 6)) * 10} gp`,       draws: 3, consum: 1, trinkets: [1, 2], hook: 1 },
-  kingly: { label: "Kingly",  coin: () => `${sum(rollDice(6, 6)) * 10} gp`,       draws: 5, consum: 1, trinkets: [2, 2], hook: 1, centerpiece: true }
+  pocket: { label: "Pocket",  coin: () => `${sum(rollDice(2, 6))} sp`,            draws: 0, consum: 0.3, trinkets: [0, 1], hook: 0.15, relics: 0 },
+  cache:  { label: "Cache",   coin: () => `${sum(rollDice(1, 6))} gp, ${sum(rollDice(2, 6))} sp`, draws: 1, consum: 0.8, trinkets: [0, 1], hook: 0.3, relics: 0.2 },
+  chest:  { label: "Chest",   coin: () => `${sum(rollDice(4, 6))} gp`,            draws: 2, consum: 1, trinkets: [1, 1], hook: 0.5, relics: 0.5 },
+  vault:  { label: "Vault",   coin: () => `${sum(rollDice(2, 6)) * 10} gp`,       draws: 3, consum: 1, trinkets: [1, 2], hook: 1, relics: 1 },
+  kingly: { label: "Kingly",  coin: () => `${sum(rollDice(6, 6)) * 10} gp`,       draws: 5, consum: 1, trinkets: [2, 2], hook: 1, centerpiece: true, relics: 2 }
 };
 
 async function forgeHoard({ size = "chest" } = {}) {
   const tier = HOARDS[size] ?? HOARDS.chest;
-  const [weapons, armour, gear] = await Promise.all(["weapons", "armour", "gear"].map(packDocs));
+  const [weapons, armour, gear, treasure] = await Promise.all(["weapons", "armour", "gear", "treasure"].map(packDocs));
   const consumables = gear.filter(g => g.system.consumable);
   const mundane = [...weapons, ...armour, ...gear.filter(g => !g.system.consumable)];
 
@@ -1521,6 +1544,13 @@ async function forgeHoard({ size = "chest" } = {}) {
   if (Math.random() < tier.consum) found.push(rnd(consumables));
   for (let i = 0; i < tier.draws; i++) found.push(rnd(mundane));
   if (found.length) lines.push(`<b>Goods:</b> ${found.map(d => `@UUID[${d.uuid}]{${d.name}}`).join(" · ")}`);
+
+  // A magic relic or two in the richer hoards (a fraction is a chance, an integer a count).
+  const nRelics = (tier.relics ?? 0) >= 1 ? tier.relics : (Math.random() < (tier.relics ?? 0) ? 1 : 0);
+  if (nRelics && treasure.length) {
+    const relics = pickN(treasure, Math.min(nRelics, treasure.length));
+    lines.push(`<b>Relic${relics.length > 1 ? "s" : ""}:</b> ${relics.map(d => `@UUID[${d.uuid}]{${d.name}}`).join(" · ")}`);
+  }
 
   const nTr = between(tier.trinkets);
   if (nTr) lines.push(`<b>Vanities:</b> ${pickN(FORGE_TRINKETS, nTr).map(([t, v]) => `${t} <i>(${v} gp)</i>`).join(" · ")}`);

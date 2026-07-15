@@ -18,19 +18,6 @@
   {{else if sys.rattled}}<div class="v-banner rattled">RATTLED — −1 die on everything until you recover</div>{{/if}}
   {{#if sys.reckoning}}<div class="v-banner reckoning">SIX BANES — THE RECKONING IS DUE</div>{{/if}}
 
-  {{!-- Conditions strip — grouped icon chips, always visible, click to toggle & read below --}}
-  <div class="v-conditions">
-    {{#each conditionGroups}}
-    <div class="cond-group {{group}}">
-      {{#each items}}
-      <span class="cond-badge {{../group}} {{#if active}}on{{/if}}" data-cond="{{id}}" title="{{name}} — {{short}} · ends: {{ends}}">
-        <img src="{{img}}" alt=""><span class="cond-name">{{name}}</span>
-      </span>
-      {{/each}}
-    </div>
-    {{/each}}
-  </div>
-
   <nav class="sheet-tabs tabs" data-group="primary">
     <a class="item" data-tab="main">Character</a>
     <a class="item" data-tab="combat">Combat &amp; Gear</a>
@@ -307,7 +294,20 @@
 
   </section>
 
-  {{!-- Conditions in play — pinned to the foot of the sheet, across every tab --}}
+  {{!-- Conditions — an even grid at the foot, across every tab; click to toggle & read below --}}
+  <div class="v-cond-foot">
+    <div class="v-cond-title">Conditions · click to set &amp; read</div>
+    <div class="v-conditions">
+      {{#each conditionGroups}}
+      {{#each items}}
+      <span class="cond-badge {{../group}} {{#if active}}on{{/if}}" data-cond="{{id}}" title="{{name}} — {{short}} · ends: {{ends}}">
+        <img src="{{img}}" alt=""><span class="cond-name">{{name}}</span>
+      </span>
+      {{/each}}
+      {{/each}}
+    </div>
+  </div>
+
   {{#if focusCond}}
   <div class="v-cond-detail {{focusCond.group}}">
     <img src="{{focusCond.img}}" alt="">

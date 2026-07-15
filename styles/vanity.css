@@ -904,40 +904,52 @@
 /* ============================================================
    Conditions — grouped icon chips + a details panel at the foot
    ============================================================ */
-.vanity-sheet .v-conditions {
+.vanity-sheet .v-cond-foot {
   flex: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  padding: 4px 2px 7px;
-  margin-bottom: 6px;
-  border-bottom: 1.5px dotted var(--v-line);
+  margin: 12px 2px 0;
+  padding-top: 8px;
+  border-top: 1.5px dotted var(--v-line);
 }
-.vanity-sheet .cond-group { display: flex; flex-wrap: wrap; gap: 3px; padding-right: 8px; }
-.vanity-sheet .cond-group + .cond-group { border-left: 1px solid var(--v-line); padding-left: 10px; }
+.vanity-sheet .v-cond-title {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--v-ink2); margin-bottom: 7px;
+}
+/* An even grid: every condition is an equal-sized tile, aligned in tidy rows. */
+.vanity-sheet .v-conditions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: 6px;
+}
 .vanity-sheet .cond-badge {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   gap: 4px;
-  padding: 1px 8px 1px 2px;
-  border: 1.3px solid transparent;
-  border-radius: 12px;
+  padding: 7px 4px 6px;
+  border: 1.4px solid var(--v-line);
+  border-radius: 8px;
+  background: var(--v-paper2);
   cursor: pointer;
-  opacity: 0.62;
-  transition: opacity 0.12s, background 0.12s, box-shadow 0.12s;
+  opacity: 0.6;
+  text-align: center;
+  transition: opacity 0.12s, background 0.12s, box-shadow 0.12s, border-color 0.12s;
 }
 .vanity-sheet .cond-badge img {
-  width: 20px; height: 20px; flex: none;
-  filter: grayscale(0.55);
+  width: 34px; height: 34px; flex: none;
+  filter: grayscale(0.6);
   transition: filter 0.12s;
 }
-.vanity-sheet .cond-badge .cond-name { font-size: 10.5px; color: var(--v-ink2); white-space: nowrap; }
-.vanity-sheet .cond-badge:hover { opacity: 0.9; background: rgba(176,135,47,0.08); }
+.vanity-sheet .cond-badge .cond-name {
+  font-size: 10.5px; line-height: 1.15; color: var(--v-ink2);
+}
+.vanity-sheet .cond-badge:hover { opacity: 0.92; background: rgba(176,135,47,0.10); }
 .vanity-sheet .cond-badge.on {
   opacity: 1;
   background: #fff;
   border-color: var(--cc, var(--v-gold));
-  box-shadow: 0 0 5px var(--ccg, rgba(176,135,47,.45));
+  box-shadow: 0 0 6px var(--ccg, rgba(176,135,47,.45));
 }
 .vanity-sheet .cond-badge.on img { filter: none; }
 .vanity-sheet .cond-badge.on .cond-name { color: var(--v-ink); font-weight: 600; }
