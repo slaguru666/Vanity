@@ -1,27 +1,65 @@
 {
   "Actor": {
-    "types": ["character", "npc"],
+    "types": [
+      "character",
+      "npc"
+    ],
     "character": {
       "attributes": {
-        "brawn": { "value": 2 },
-        "flair": { "value": 2 },
-        "wits":  { "value": 2 },
-        "poise": { "value": 2 }
+        "brawn": {
+          "value": 2
+        },
+        "flair": {
+          "value": 2
+        },
+        "wits": {
+          "value": 2
+        },
+        "poise": {
+          "value": 2
+        }
       },
-      "grit":   { "value": 8, "max": 8 },
-      "vanity": { "value": 3 },
-      "karma":  { "value": 0 },
-      "glory":  { "value": 0 },
+      "grit": {
+        "value": 8,
+        "max": 8
+      },
+      "vanity": {
+        "value": 3
+      },
+      "karma": {
+        "value": 0
+      },
+      "glory": {
+        "value": 0
+      },
       "knacks": {
-        "fight":     { "rank": 0 },
-        "shoot":     { "rank": 0 },
-        "athletics": { "rank": 0 },
-        "stealth":   { "rank": 0 },
-        "notice":    { "rank": 0 },
-        "lore":      { "rank": 0 },
-        "survive":   { "rank": 0 },
-        "charm":     { "rank": 0 },
-        "command":   { "rank": 0 }
+        "fight": {
+          "rank": 0
+        },
+        "shoot": {
+          "rank": 0
+        },
+        "athletics": {
+          "rank": 0
+        },
+        "stealth": {
+          "rank": 0
+        },
+        "notice": {
+          "rank": 0
+        },
+        "lore": {
+          "rank": 0
+        },
+        "survive": {
+          "rank": 0
+        },
+        "charm": {
+          "rank": 0
+        },
+        "command": {
+          "rank": 0
+        }
       },
       "locked": {
         "name": "",
@@ -32,12 +70,23 @@
         "class": "",
         "concept": "",
         "fightingStyle": "",
-        "coin": { "cp": 0, "sp": 0, "gp": 15 }
+        "coin": {
+          "cp": 0,
+          "sp": 0,
+          "gp": 15
+        }
       },
       "companion": {
         "name": "",
-        "grit": { "value": 3, "max": 3 },
+        "kind": "",
+        "img": "",
+        "grit": {
+          "value": 3,
+          "max": 3
+        },
         "pool": 3,
+        "dodge": 3,
+        "trick": "",
         "notes": ""
       },
       "notes": "",
@@ -45,18 +94,42 @@
     },
     "npc": {
       "category": "mook",
-      "attack1": { "name": "Attack", "pool": 3, "note": "" },
-      "attack2": { "name": "", "pool": 0, "note": "" },
-      "defence": { "pool": 2, "note": "" },
-      "grit":    { "value": 1, "max": 1 },
-      "resolve": { "value": 0, "max": 0 },
+      "attack1": {
+        "name": "Attack",
+        "pool": 3,
+        "note": ""
+      },
+      "attack2": {
+        "name": "",
+        "pool": 0,
+        "note": ""
+      },
+      "defence": {
+        "pool": 2,
+        "note": ""
+      },
+      "grit": {
+        "value": 1,
+        "max": 1
+      },
+      "resolve": {
+        "value": 0,
+        "max": 0
+      },
       "nerve": 2,
       "trick": "",
       "notes": ""
     }
   },
   "Item": {
-    "types": ["weapon", "armour", "gear", "spell", "edge", "vice"],
+    "types": [
+      "weapon",
+      "armour",
+      "gear",
+      "spell",
+      "edge",
+      "vice"
+    ],
     "weapon": {
       "dice": 0,
       "hands": 1,

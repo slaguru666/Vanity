@@ -633,6 +633,8 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
       items: ctx.conditions.filter(c => c.group === g)
     }));
     ctx.activeConditions = ctx.conditions.filter(c => c.active);
+    const cmp = this.actor.system.companion;
+    ctx.companionDowned = !!cmp?.name && (cmp.grit?.value ?? 3) <= 0;
     ctx.focusCond = this._focusCond
       ? ctx.conditions.find(c => c.id === this._focusCond) ?? null
       : null;
@@ -881,11 +883,69 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
       this.render(false);
     });
 
-    // Companion roll
-    html.find(".companion-roll").click(() => {
-      const c = actor.system.companion;
-      if (!c?.name) return;
-      promptAndRoll(actor, { title: `${c.name} (companion)`, base: c.pool || 3, baseLabel: `Companion pool ${c.pool || 3}` });
+    // Companion — attack / dodge
+    html.find(".cmp-roll").click(ev => {
+      const c = actor.system.companion ?? {};
+      const name = c.name || "The companion";
+      if (ev.currentTarget.dataset.roll === "dodge") {
+        return promptAndRoll(actor, { title: `${name} — dodges`, base: c.dodge || 3,
+          baseLabel: `Companion dodge ${c.dodge || 3}` });
+      }
+      return promptAndRoll(actor, { title: `${name} — attacks`, base: c.pool || 3,
+        baseLabel: `Companion pool ${c.pool || 3}`, options: { context: "attack" } });
+    });
+
+    // Companion — Help · Harry · Guard (one action a round)
+    html.find(".cmp-act").click(async ev => {
+      const c = actor.system.companion ?? {};
+      const name = c.name || "The companion";
+      const kind = c.kind ? ` the ${c.kind}` : "";
+      const ACTS = {
+        help: ["Help", "+1 die",
+          `${name}${kind} flanks, flushes or calls the shot — <b>${actor.name} gains +1 die</b> on their next roll this round.`],
+        harry: ["Harry", "−1 die",
+          `${name}${kind} worries the foe — that foe takes <b>−1 die</b>, and ${actor.name} may treat it as <b>flanked</b> for Ambush-style shots.`],
+        guard: ["Guard", "reaction",
+          `${name}${kind} throws itself in the way — it <b>intercepts one hit</b> meant for ${actor.name}. That is the companion's reaction this round.`],
+      };
+      const [label, tag, text] = ACTS[ev.currentTarget.dataset.act] ?? [];
+      if (!label) return;
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor }),
+        content: `<div class="vanity-roll vanity-companion-card">
+          <header><span class="vanity-roll-label">🐾 ${label} — ${tag}</span>
+          <span class="vanity-roll-sub">${name}${kind} · the companion's action this round</span></header>
+          <p>${text}</p>
+          ${c.trick ? `<p class="cmp-trick"><b>Trick:</b> ${c.trick}</p>` : ""}
+        </div>`
+      });
+    });
+
+    // Companion — roll the Bond (d10) and bind the beast to the sheet
+    html.find(".cmp-bond").click(async () => {
+      const table = await getVanityTable(BOND_TABLE_NAME);
+      if (!table) return ui.notifications.error(`"${BOND_TABLE_NAME}" not found in world or compendium.`);
+      const roll = new Roll("1d10");
+      await roll.evaluate();
+      lockVanityDice(roll);
+      if (game.dice3d) await game.dice3d.showForRoll(roll, game.user, true).catch(() => {});
+      const results = table.getResultsForRoll(roll.total);
+      await table.toMessage(results, { roll });
+
+      // Bind it: pull the matching beast from the companions compendium.
+      const kind = (results?.[0]?.name ?? "").split("—")[0].trim();
+      const beast = (await packDocs("companions")).find(d => d.name === `${kind} (companion)`);
+      if (!beast) return;
+      await actor.update({
+        "system.companion.kind": kind.toLowerCase(),
+        "system.companion.img": beast.img,
+        "system.companion.pool": beast.system.attack1?.pool ?? 3,
+        "system.companion.dodge": beast.system.defence?.pool ?? 3,
+        "system.companion.trick": beast.system.trick ?? "",
+        "system.companion.grit.value": beast.system.grit?.max ?? 3,
+        "system.companion.grit.max": beast.system.grit?.max ?? 3,
+      });
+      ui.notifications.info(`The Bond: a ${kind.toLowerCase()}. Name it — the table will be shouting that name soon enough.`);
     });
   }
 }
@@ -1019,6 +1079,7 @@ Hooks.on("diceSoNiceRollStart", (messageId, context) => {
 
 const TWIST_TABLE_NAME = "Twist the Knife — spending Banes (d66)";
 const RECKONING_TABLE_NAME = "THE RECKONING — the tab reads six (2d6)";
+const BOND_TABLE_NAME = "The Bond — Animal Companions (d10)";
 
 async function getVanityTable(name) {
   let table = game.tables.getName(name);

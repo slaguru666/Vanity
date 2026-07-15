@@ -273,13 +273,43 @@
     {{!-- ============ TAB: STORY ============ --}}
     <div class="tab" data-tab="story" data-group="primary">
       <div class="sect">
-        <div class="bar">Companion</div>
-        <div class="body companion-grid">
-          <label class="f"><span class="cap">Name</span><input type="text" name="system.companion.name" value="{{sys.companion.name}}" placeholder="Ash the hawk…" /></label>
-          <label class="f"><span class="cap">Pool</span><input type="number" name="system.companion.pool" value="{{sys.companion.pool}}" /></label>
-          <label class="f"><span class="cap">Grit</span><input type="number" name="system.companion.grit.value" value="{{sys.companion.grit.value}}" /> / <input type="number" name="system.companion.grit.max" value="{{sys.companion.grit.max}}" /></label>
-          <button type="button" class="companion-roll" title="Roll the companion's pool"><i class="fa-solid fa-paw"></i> Roll</button>
-          <label class="f wide"><span class="cap">Notes (Help · Harry · Guard — Downed at 0 Grit, not dead)</span><input type="text" name="system.companion.notes" value="{{sys.companion.notes}}" /></label>
+        <div class="bar">Companion — the Bond
+          <button type="button" class="cmp-bond" title="Roll d10 on The Bond, or pick from the Animal Companions compendium"><i class="fa-solid fa-dice-d20"></i> Roll the Bond</button>
+        </div>
+        <div class="body companion-card">
+          <div class="cmp-art">
+            {{#if sys.companion.img}}<img src="{{sys.companion.img}}" alt="{{sys.companion.name}}" />
+            {{else}}<div class="cmp-art-empty"><i class="fa-solid fa-paw"></i></div>{{/if}}
+          </div>
+          <div class="cmp-body">
+            <div class="cmp-line">
+              <label class="f grow"><span class="cap">Name</span>
+                <input type="text" name="system.companion.name" value="{{sys.companion.name}}" placeholder="Ash…" /></label>
+              <label class="f grow"><span class="cap">Kind</span>
+                <input type="text" name="system.companion.kind" value="{{sys.companion.kind}}" placeholder="hawk" /></label>
+            </div>
+            <div class="cmp-line">
+              <label class="f"><span class="cap">Attack</span>
+                <input type="number" name="system.companion.pool" value="{{sys.companion.pool}}" /></label>
+              <label class="f"><span class="cap">Dodge</span>
+                <input type="number" name="system.companion.dodge" value="{{sys.companion.dodge}}" /></label>
+              <label class="f"><span class="cap">Grit</span>
+                <input type="number" name="system.companion.grit.value" value="{{sys.companion.grit.value}}" />
+                <span class="sl">/</span>
+                <input type="number" name="system.companion.grit.max" value="{{sys.companion.grit.max}}" /></label>
+              {{#if companionDowned}}<span class="cmp-downed">DOWNED — not dead</span>{{/if}}
+            </div>
+            <label class="f wide"><span class="cap">Trick</span>
+              <input type="text" name="system.companion.trick" value="{{sys.companion.trick}}" placeholder="its one distinctive knack…" /></label>
+            <div class="cmp-actions">
+              <span class="cap">Each round, one action</span>
+              <button type="button" class="cmp-act" data-act="help" title="It flanks, flushes or calls the shot: you gain +1 die">Help <b>+1 die</b></button>
+              <button type="button" class="cmp-act" data-act="harry" title="It worries a foe: −1 die, and you may treat it as flanked">Harry <b>−1 die</b></button>
+              <button type="button" class="cmp-act" data-act="guard" title="Reaction: it intercepts one hit meant for you">Guard <b>reaction</b></button>
+              <button type="button" class="cmp-roll" data-roll="attack" title="Roll the companion's attack pool"><i class="fa-solid fa-paw"></i> Attack</button>
+              <button type="button" class="cmp-roll" data-roll="dodge" title="Roll the companion's dodge"><i class="fa-solid fa-feather"></i> Dodge</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="sect">
