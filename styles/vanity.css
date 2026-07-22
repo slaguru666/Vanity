@@ -376,6 +376,25 @@
   font-style: normal;
   margin-left: 4px;
 }
+/* Targeting — the defender's answer, on the attack card */
+.vanity-target {
+  margin-top: 8px;
+  padding: 7px 9px;
+  border: 1px solid var(--v-plum);
+  border-left-width: 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.05);
+}
+.vanity-target .tgt-head { font-size: 13px; }
+.vanity-target .tgt-sub { color: var(--v-ink2); font-size: 11.5px; margin-left: 5px; }
+.vanity-target .pierced { color: var(--v-gold-d); font-style: italic; }
+.vanity-target .tgt-dice { margin: 3px 0; font-size: 17px; line-height: 1.2; }
+.vanity-target .tgt-dice .d { margin-right: 2px; opacity: 0.55; }
+.vanity-target .tgt-dice .d.hit { opacity: 1; color: var(--v-teal-d); }
+.vanity-target .tgt-dice .d.one { opacity: 1; color: var(--v-plum); }
+.vanity-target .tgt-res { font-size: 11.5px; color: var(--v-ink2); margin-left: 6px; }
+.vanity-target .tgt-net { font-size: 12.5px; }
+
 /* Straining the Weave (§17) — repeats in a scene raise the Threshold */
 .vanity-sheet .strain-badge {
   font-size: 10px;

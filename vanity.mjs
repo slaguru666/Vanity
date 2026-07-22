@@ -97,10 +97,42 @@ const MANEUVERS = [
 ];
 
 /**
+ * Spell Effects (§17) — the caster's maneuver menu. Successes past the
+ * Threshold buy these as readily as they buy the spell's own scaling line.
+ * The `fits` line is guidance for the table, not a hard gate: common sense
+ * (§6a) decides whether this spell could plausibly do this thing.
+ */
+const SPELL_EFFECTS = [
+  { key: "ignite", label: "Ignite", cost: 1, hint: "1 Grit at the start of each of their turns until put out.",
+    desc: "The target <b>burns</b>: <b>1 Grit at the start of each of their turns</b> until they spend an Action smothering it. <i>Fire, acid, lightning.</i>" },
+  { key: "blind", label: "Blind", cost: 1, hint: "−2 dice on anything needing sight, one round.",
+    desc: "Light, dust or a flood of dark: <b>−2 dice</b> on anything that needs eyes, until the end of their next turn. <i>Light, illusion, weather.</i>" },
+  { key: "snare", label: "Snare", cost: 1, hint: "Held until they win a Brawn contest.",
+    desc: "Roots, ice, webbing or grasping shadow — the target is <b>Held</b> until they win a <b>Brawn contest</b> to tear free. <i>Nature, ice, shadow.</i>" },
+  { key: "push", label: "Push", cost: 1, hint: "Thrown a pace and knocked prone.",
+    desc: "The target is thrown <b>a pace and knocked prone</b> — off the parapet, out of the circle, into the fire you just lit. <i>Force, wind, water.</i>" },
+  { key: "silence", label: "Silence", cost: 1, hint: "They cannot cast until their next turn.",
+    desc: "No breath, no words, no incantation: the target <b>cannot cast</b> until their next turn. The cleanest answer to an enemy spellcaster. <i>Divine, mind, sound.</i>" },
+  { key: "shield", label: "Shield the Ally", cost: 1, hint: "An ally gains +2 defence dice until their next turn.",
+    desc: "Spend the power outward instead: an ally gains <b>+2 defence dice</b> until their next turn. <i>Any protective list.</i>" },
+  { key: "spread", label: "Spread", cost: 2, hint: "Also strikes one further target within reach.",
+    desc: "The magic carries: it also strikes <b>one further target within reach</b> of the first, for your remaining damage. <i>Fire, sound, area.</i>" },
+  { key: "linger", label: "Linger", cost: 2, hint: "Lasts a second round — and doesn't strain the Weave for it.",
+    desc: "The effect <b>lasts a second round</b> with no second casting — and crucially does <b>not</b> strain the Weave (§17) for it. <i>Wards, clouds, blessings.</i>" },
+  { key: "unmake", label: "Unmake", cost: 2, hint: "Strip a ward, blessing, resistance or enchantment.",
+    desc: "Strip a <b>magical defence</b>: a ward, a blessing, a resistance, or one enchantment on an object. <i>Arcane, divine.</i>" },
+  { key: "mark", label: "Mark of the Divine", cost: 2, hint: "Faith only: allies get +1 die against them all scene.",
+    desc: "<b>Faith only.</b> The target is <b>Marked</b>: every ally's attack against them gains <b>+1 die</b> until the scene ends. <i>Divine only.</i>" }
+];
+
+/** Which menu a card's spare Successes may be spent from. */
+function menuFor(context) { return context === "spell" ? SPELL_EFFECTS : MANEUVERS; }
+
+/**
  * The interactive spend panel for attack cards: click maneuvers to buy them
  * with Successes, dial in the defender's Successes, read off the damage.
  */
-function renderSpendPanel({ successes, spend, sublabel }) {
+function renderSpendPanel({ successes, spend, sublabel, menu = MANEUVERS, context = "attack", threshold = 0 }) {
   const s = { defence: 0, damage: 0, maneuvers: [], ...(spend ?? {}) };
   const net = successes - s.defence;
 
@@ -117,35 +149,36 @@ function renderSpendPanel({ successes, spend, sublabel }) {
       <button type="button" class="def-btn" data-def="1">+</button>
     </div>`;
 
-  if (net <= 0) {
+  if (net <= 0 && context !== "spell") {
     return `<div class="vanity-spend">
       ${defRow}
       <div class="turned">Turned aside — net ${net}, no harm done.</div>
     </div>`;
   }
 
-  const budget = net - 1;
-  const spentOnMans = s.maneuvers.reduce((n, k) => n + (MANEUVERS.find(m => m.key === k)?.cost ?? 0), 0);
+  const isSpell = context === "spell";
+  const budget = isSpell ? Math.max(0, successes - (threshold || 1)) : net - 1;
+  const spentOnMans = s.maneuvers.reduce((n, k) => n + (menu.find(m => m.key === k)?.cost ?? 0), 0);
   const remaining = budget - s.damage - spentOnMans;
-  const totalDamage = 1 + s.damage;
+  const totalDamage = (isSpell ? 0 : 1) + s.damage;
 
-  const manBtns = MANEUVERS.map(m => {
+  const manBtns = menu.map(m => {
     const sel = s.maneuvers.includes(m.key);
     const disabled = !sel && remaining < m.cost;
     return `<button type="button" class="spend-btn ${sel ? "sel" : ""}" data-man="${m.key}"
       title="${m.hint}" ${disabled ? "disabled" : ""}>${m.label}<i>${m.cost}</i></button>`;
   }).join("");
 
-  const chosen = s.maneuvers.map(k => MANEUVERS.find(m => m.key === k)).filter(Boolean);
+  const chosen = s.maneuvers.map(k => menu.find(m => m.key === k)).filter(Boolean);
   const descs = chosen.map(m => `<div class="man-desc">
       <span class="man-name">${m.label}</span><span class="man-cost">${m.cost} Success${m.cost > 1 ? "es" : ""}</span>
       <p>${m.desc}</p>
     </div>`).join("");
 
   return `<div class="vanity-spend">
-    ${defRow}
+    ${isSpell ? "" : defRow}
     <div class="dmg-line">
-      <span class="dmg">Damage: <b>${totalDamage} Grit</b></span>
+      <span class="dmg">${isSpell && !s.damage ? "Effects" : `Damage: <b>${totalDamage} Grit</b>`}</span>
       <span class="left">${remaining > 0 ? `${remaining} Success${remaining === 1 ? "" : "es"} to spend` : "all spent"}</span>
     </div>
     <div class="spend-buttons dmg-row">
@@ -282,7 +315,7 @@ function renderDice(results) {
 /**
  * Build the chat-card HTML for a pool roll.
  */
-function renderRollCard({ label, sublabel, results, threshold, pushed, context, extra, spend, banked = 0, twistUsed = false, spell = null }) {
+function renderRollCard({ label, sublabel, results, threshold, pushed, context, extra, spend, banked = 0, twistUsed = false, spell = null, target = null }) {
   const successes = results.filter(r => r >= 5).length;
   const ones = results.filter(r => r === 1).length;
   const stumble = successes === 0 && ones >= 2;
@@ -307,8 +340,8 @@ function renderRollCard({ label, sublabel, results, threshold, pushed, context, 
     }
   }
 
-  const specials = context === "attack" && successes >= 1
-    ? renderSpendPanel({ successes, spend, sublabel })
+  const specials = (context === "attack" || context === "spell") && successes >= 1
+    ? renderSpendPanel({ successes, spend, sublabel, menu: menuFor(context), context, threshold })
     : "";
 
   const spellBanner = spell ? `
@@ -343,10 +376,75 @@ function renderRollCard({ label, sublabel, results, threshold, pushed, context, 
       ? `<div class="vanity-buttons twist-row"><button type="button" class="vanity-twist free" data-free="true"><i class="fa-solid fa-dice"></i> GM: Twist the Knife — free d66</button></div>`
       : twistUsed ? `<div class="twist-spent">The knife has been twisted.</div>` : ""}
     ${spellScaling}
+    ${targetBlock(target, results, spend)}
     ${extra ? `<div class="vanity-extra">${extra}</div>` : ""}
     ${specials}
     ${buttons ? `<div class="vanity-buttons">${buttons}</div>` : ""}
   </div>`;
+}
+
+/**
+ * The exchange, resolved (§10): who was struck at, what their guard rolled,
+ * and what is left to land. Damage is applied on a button so the GM stays in
+ * charge of the fiction — Subdue, mercy and "he was already down" all live in
+ * the beat between the roll and the click.
+ */
+function targetBlock(target, results, spend) {
+  if (!target) return "";
+  const successes = results.filter(r => r >= 5).length;
+  const net = Math.max(0, successes - (spend?.defence ?? target.successes ?? 0));
+  const damage = spend?.damage ?? 0;
+  const pips = (target.results ?? []).map(r =>
+    `<span class="d ${r >= 5 ? "hit" : r === 1 ? "one" : ""}">${DIE_FACES[r] ?? r}</span>`).join("");
+  const pierceNote = target.piercing
+    ? (target.pierced
+      ? ` · <span class="pierced">armour-piercing — ${target.full}d cut to ${target.pool}d</span>`
+      : ` · <span class="pierced">armour-piercing — nothing left to strip</span>`)
+    : "";
+  return `
+  <div class="vanity-target">
+    <div class="tgt-head"><i class="fa-solid fa-crosshairs"></i> <b>${target.name}</b>
+      <span class="tgt-sub">${target.label} ${target.pool}d${pierceNote}</span></div>
+    <div class="tgt-dice">${pips}<span class="tgt-res">${target.successes} Success${target.successes === 1 ? "" : "es"} stopped</span></div>
+    <div class="tgt-net">${net > 0
+      ? `<b>${net}</b> net Success${net === 1 ? "" : "es"} through — spend ${net === 1 ? "it" : "them"} above`
+      : `<b>Turned aside.</b> The guard held.`}</div>
+    ${damage > 0
+      ? `<div class="vanity-buttons"><button type="button" class="vanity-apply" data-damage="${damage}"><i class="fa-solid fa-heart-crack"></i> Apply ${damage} Grit to ${target.name}</button></div>`
+      : ""}
+  </div>`;
+}
+
+/**
+ * Take the damage off the target's Grit and say what it did.
+ *
+ * Applied once — the button disarms itself afterwards, so a card cannot be
+ * clicked twice in the noise of a fight. Emptying Grit announces Taken Out
+ * (§5a) but never decides the state: Down, Broken or Dying is the GM's call,
+ * and Subdue was declared before the roll.
+ */
+async function applyDamageToTarget(message, damage) {
+  const f = message.flags?.vanity;
+  if (!f?.target?.uuid || damage <= 0) return;
+  if (f.applied) return ui.notifications.warn("That blow has already been paid for.");
+
+  const actor = await fromUuid(f.target.uuid);
+  if (!actor) return ui.notifications.warn("That target is no longer on the board.");
+
+  const grit = actor.system?.grit ?? {};
+  const before = Number(grit.value) || 0;
+  const after = Math.max(0, before - damage);
+  await actor.update({ "system.grit.value": after });
+
+  const takenOut = after === 0 && before > 0;
+  await message.update({ "flags.vanity.applied": true });
+  await ChatMessage.create({
+    speaker: { alias: "The Exchange" },
+    content: `<div class="vanity-roll vanity-forge-card">
+      <p><b>${f.target.name}</b> takes <b>${damage} Grit</b> — ${before} → <b>${after}</b>.</p>
+      ${takenOut ? `<p><b>TAKEN OUT.</b> Down, Broken or Dying is the GM's call (§5a) — and whoever struck the blow chose Subdue or Kill before it landed.</p>` : ""}
+    </div>`
+  });
 }
 
 /**
@@ -387,7 +485,8 @@ async function rollPool(actor, pool, label, options = {}) {
       extra: "",
       banked,
       spell: options.spell ?? null,
-      spend: { defence: 0, damage: 0, maneuvers: [] }
+      target: options.target ?? null,
+      spend: options.spend ?? { defence: 0, damage: 0, maneuvers: [] }
     }
   };
 
@@ -395,10 +494,73 @@ async function rollPool(actor, pool, label, options = {}) {
     speaker: ChatMessage.getSpeaker({ actor }),
     rolls: [roll],
     sound: CONFIG.sounds.dice,
-    content: renderRollCard({ label, sublabel: options.sublabel, results, threshold: options.threshold, pushed: false, context: options.context, banked, spell: options.spell ?? null }),
+    content: renderRollCard({
+      label, sublabel: options.sublabel, results, threshold: options.threshold, pushed: false,
+      context: options.context, banked, spell: options.spell ?? null,
+      target: options.target ?? null, spend: flags.vanity.spend
+    }),
     flags
   });
   if (banked) await actor.addBanes(1, `a Stumble on “${label}”`);
+}
+
+/* -------------------------------------------- */
+/*  Targeting — the defender answers for itself   */
+/* -------------------------------------------- */
+
+/** Does this weapon's properties line claim Armour-Piercing? */
+function isPiercing(text) {
+  return /armour[-\s]?piercing|armor[-\s]?piercing|\bAP\b/i.test(String(text ?? ""));
+}
+
+/**
+ * The pool a defender actually rolls.
+ *
+ * Characters defend with the better of block or dodge — nobody chooses their
+ * worse guard. Armour-Piercing strips up to 2 armour dice, but §11a is
+ * absolute: Attribute dice always defend, so the pool never falls below the
+ * governing Attribute. A nameless foe has no attribute breakdown to protect,
+ * so AP simply thins its pool, never below one die.
+ */
+function defenceProfile(actor, { piercing = false } = {}) {
+  const sys = actor.system ?? {};
+  if (actor.type !== "character") {
+    const pool = Number(sys.defence?.pool) || 0;
+    return {
+      pool: piercing ? Math.max(1, pool - 2) : pool,
+      label: sys.defence?.note?.trim() || "defence", floor: 1, full: pool
+    };
+  }
+  const dodge = Number(sys.dodgePool) || 0;
+  const block = Number(sys.blockPool) || 0;
+  const useBlock = block >= dodge;
+  const attr = Number(useBlock ? sys.attributes?.brawn?.value : sys.attributes?.flair?.value) || 0;
+  const full = useBlock ? block : dodge;
+  return {
+    pool: piercing ? Math.max(attr, full - 2) : full,
+    label: useBlock ? "block" : "dodge", floor: attr, full
+  };
+}
+
+/** Roll a defender's guard and report what it stopped. */
+async function rollDefence(actor, { piercing = false } = {}) {
+  const prof = defenceProfile(actor, { piercing });
+  const roll = new Roll(`${Math.max(1, prof.pool)}d6`);
+  await roll.evaluate();
+  const results = roll.dice[0].results.map(r => r.result);
+  return {
+    ...prof, results, roll,
+    successes: results.filter(r => r >= 5).length,
+    pierced: piercing && prof.pool < prof.full
+  };
+}
+
+/** The token the attacker has targeted, if exactly one is marked. */
+function currentTarget() {
+  const t = [...(game.user?.targets ?? [])];
+  if (t.length !== 1) return null;
+  const token = t[0];
+  return token?.actor ? { token, actor: token.actor, name: token.name || token.actor.name } : null;
 }
 
 /* -------------------------------------------- */
@@ -544,7 +706,7 @@ async function handlePush(message) {
   await message.update({
     content: renderRollCard({
       label: f.label, sublabel: f.sublabel, results: newResults,
-      threshold: f.threshold, pushed: true, context: f.context, extra, spend, banked, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null
+      threshold: f.threshold, pushed: true, context: f.context, extra, spend, banked, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null, target: f.target ?? null
     }),
     "flags.vanity.results": newResults,
     "flags.vanity.pushed": true,
@@ -574,8 +736,10 @@ async function handleSpend(message, dataset) {
   }
 
   // Never overspend: if the budget shrank (defence went up), drop purchases.
-  const budget = Math.max(0, successes - spend.defence - 1);
-  const cost = spend.damage + spend.maneuvers.reduce((n, k) => n + (MANEUVERS.find(m => m.key === k)?.cost ?? 0), 0);
+  const budget = f.context === "spell"
+    ? Math.max(0, successes - (f.threshold || 1))
+    : Math.max(0, successes - spend.defence - 1);
+  const cost = spend.damage + spend.maneuvers.reduce((n, k) => n + (menuFor(f.context).find(m => m.key === k)?.cost ?? 0), 0);
   if (cost > budget) {
     if (dataset.def !== undefined) { spend.damage = 0; spend.maneuvers = []; }
     else return; // an illegal purchase — ignore the click
@@ -584,7 +748,7 @@ async function handleSpend(message, dataset) {
   await message.update({
     content: renderRollCard({
       label: f.label, sublabel: f.sublabel, results: f.results,
-      threshold: f.threshold, pushed: f.pushed, context: f.context, extra: f.extra, spend, banked: f.banked ?? 0, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null
+      threshold: f.threshold, pushed: f.pushed, context: f.context, extra: f.extra, spend, banked: f.banked ?? 0, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null, target: f.target ?? null
     }),
     "flags.vanity.spend": spend
   });
@@ -601,7 +765,7 @@ async function handleFizzle(message) {
   await message.update({
     content: renderRollCard({
       label: f.label, sublabel: f.sublabel, results: f.results,
-      threshold: f.threshold, pushed: true, context: f.context, extra, banked: f.banked ?? 0, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null
+      threshold: f.threshold, pushed: true, context: f.context, extra, banked: f.banked ?? 0, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null, target: f.target ?? null
     }),
     "flags.vanity.pushed": true,
     "flags.vanity.extra": extra
@@ -659,6 +823,12 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
       strain: strainCount(s), threshold: effectiveThreshold(s)
     }));
     ctx.strained = ctx.spells.some(s => s.strain > 0);
+    // The Animal Companion is the Ranger's, via Wildcraft (§7). Other classes
+    // never see the card — but if one already has a bonded beast (an edge, a
+    // gift, a GM's ruling), it stays on the sheet rather than vanishing.
+    const bond = this.actor.system.companion ?? {};
+    ctx.hasCompanion = String(this.actor.system.details?.class ?? "").trim().toLowerCase() === "ranger"
+      || Boolean(String(bond.name ?? "").trim() || String(bond.kind ?? "").trim());
     ctx.edges = items.filter(i => i.type === "edge");
     ctx.vices = items.filter(i => i.type === "vice");
     ctx.hasSpells = ctx.spells.length > 0;
@@ -786,7 +956,7 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
     });
 
     // Weapon attack
-    html.find(".item-attack").click(ev => {
+    html.find(".item-attack").click(async ev => {
       const item = actor.items.get(ev.currentTarget.closest("[data-item-id]").dataset.itemId);
       if (!item) return;
       const group = item.system.group === "shoot" ? "shoot" : "fight";
@@ -800,11 +970,26 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
         knackDice = Math.max(knackDice, Number(locked.rank) || 0);
         knackName = "Martial Prowess";
       }
-      promptAndRoll(actor, {
+      // If exactly one token is targeted, the defender answers for itself: its
+      // guard is rolled here and the result is dialled into the card, so the
+      // exchange (§10) resolves in one step instead of two.
+      const mark = currentTarget();
+      const piercing = isPiercing(item.system.properties);
+      const defence = mark ? await rollDefence(mark.actor, { piercing }) : null;
+
+      await promptAndRoll(actor, {
         title: `${item.name} — attack`,
         base: attr + knackDice + (Number(item.system.dice) || 0),
         baseLabel: `${ATTRIBUTES[attrKey].label} ${attr} + ${knackName} ${knackDice} + weapon ${item.system.dice}`,
-        options: { context: "attack", sublabel: item.system.properties }
+        options: {
+          context: "attack", sublabel: item.system.properties,
+          target: mark && defence ? {
+            uuid: mark.actor.uuid, name: mark.name, piercing,
+            label: defence.label, pool: defence.pool, full: defence.full,
+            pierced: defence.pierced, results: defence.results, successes: defence.successes
+          } : null,
+          spend: mark && defence ? { defence: defence.successes, damage: 0, maneuvers: [] } : undefined
+        }
       });
     });
 
@@ -1227,7 +1412,7 @@ async function twistTheKnife({ actorUuid = "", free = false, sourceMessage = nul
       content: renderRollCard({
         label: f.label, sublabel: f.sublabel, results: f.results, threshold: f.threshold,
         pushed: f.pushed, context: f.context, extra: f.extra, spend: f.spend,
-        banked: f.banked ?? 0, twistUsed: true, spell: f.spell ?? null
+        banked: f.banked ?? 0, twistUsed: true, spell: f.spell ?? null, target: f.target ?? null
       })
     });
   }
@@ -1940,6 +2125,12 @@ Hooks.on("renderChatMessageHTML", (message, html) => {
         return ui.notifications.warn("Only the roller (or the GM) may spend Successes.");
       }
       handleSpend(message, btn.dataset);
+    });
+  });
+  html.querySelectorAll(".vanity-apply").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (!game.user.isGM) return ui.notifications.warn("Only the GM applies damage.");
+      applyDamageToTarget(message, Number(btn.dataset.damage) || 0);
     });
   });
   html.querySelectorAll(".vanity-twist").forEach(btn => {

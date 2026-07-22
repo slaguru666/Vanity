@@ -274,6 +274,9 @@
 
     {{!-- ============ TAB: STORY ============ --}}
     <div class="tab" data-tab="story" data-group="primary">
+      {{!-- The Bond is a Ranger's Locked Knack (§7). Anyone else who has somehow
+            acquired a companion keeps their card; nobody else is offered one. --}}
+      {{#if hasCompanion}}
       <div class="sect">
         <div class="bar">Companion — the Bond
           <button type="button" class="cmp-bond" title="Roll d10 on The Bond, or pick from the Animal Companions compendium"><i class="fa-solid fa-dice-d20"></i> Roll the Bond</button>
@@ -314,6 +317,7 @@
           </div>
         </div>
       </div>
+      {{/if}}
       <div class="sect">
         <div class="bar">Notes</div>
         <div class="body">{{editor notesHTML target="system.notes" button=true editable=editable engine="prosemirror" collaborate=false}}</div>
