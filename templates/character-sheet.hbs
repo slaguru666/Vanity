@@ -244,7 +244,9 @@
     {{#if hasSpells}}
     <div class="tab" data-tab="magic" data-group="primary">
       <div class="sect">
-        <div class="bar">Spells &amp; Nature Tricks · Threshold 1·2·3</div>
+        <div class="bar">Spells &amp; Nature Tricks · Threshold 1·2·3
+          {{#if strained}}<a class="strain-reset" title="The Weave is strained — clear this scene's repeats"><i class="fa-solid fa-rotate-left"></i> Settle the Weave</a>{{/if}}
+        </div>
         <div class="body">
           <table class="v-table">
             <thead><tr><th></th><th>Spell</th><th>Thr</th><th>Effect · scaling</th><th class="ctrl"></th></tr></thead>
@@ -253,7 +255,7 @@
               <tr data-item-id="{{item.id}}" class="{{#if item.system.spent}}spent{{/if}}">
                 <td class="ctrl"><a class="item-cast" title="Cast"><i class="fa-solid fa-wand-sparkles"></i></a></td>
                 <td class="item-name">{{item.name}} <em class="listtag">{{listLabel}}</em></td>
-                <td>{{item.system.threshold}}</td>
+                <td>{{threshold}}{{#if strain}} <span class="strain-badge" title="Cast {{strain}}× this scene — Threshold {{item.system.threshold}} +{{strain}}">+{{strain}}</span>{{/if}}</td>
                 <td class="props">{{item.system.effect}}{{#if item.system.scaling}} · <em>{{item.system.scaling}}</em>{{/if}}</td>
                 <td class="ctrl">
                   <a class="item-spent" title="Toggle spent"><i class="fa-solid {{#if item.system.spent}}fa-battery-empty{{else}}fa-battery-full{{/if}}"></i></a>

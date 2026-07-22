@@ -376,6 +376,20 @@
   font-style: normal;
   margin-left: 4px;
 }
+/* Straining the Weave (§17) — repeats in a scene raise the Threshold */
+.vanity-sheet .strain-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--v-plum);
+  border: 1px solid var(--v-plum);
+  border-radius: 3px;
+  padding: 0 3px;
+  margin-left: 3px;
+  vertical-align: top;
+}
+.vanity-sheet .bar a.strain-reset { float: right; font-size: 11px; letter-spacing: 0.04em; }
+.vanity-roll-dialog .strained { color: var(--v-plum); font-style: italic; }
+
 .vanity-sheet a.item-attack i, .vanity-sheet a.item-cast i { color: var(--v-teal-d); font-size: 15px; }
 .vanity-sheet a.item-attack:hover i, .vanity-sheet a.item-cast:hover i { color: var(--v-gold-d); text-shadow: 0 0 6px rgba(176,135,47,.7); }
 .vanity-sheet a.item-edit i, .vanity-sheet a.item-delete i, .vanity-sheet a.item-spent i, .vanity-sheet a.item-equip i {

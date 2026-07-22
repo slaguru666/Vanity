@@ -401,6 +401,45 @@ async function rollPool(actor, pool, label, options = {}) {
   if (banked) await actor.addBanes(1, `a Stumble on “${label}”`);
 }
 
+/* -------------------------------------------- */
+/*  Straining the Weave (§17) — the spam brake    */
+/* -------------------------------------------- */
+
+/**
+ * Strain is per scene: cast the same spell again and its Threshold rises by
+ * +1 per prior casting, resetting when the scene changes or on a rest.
+ *
+ * The count lives in a flag stamped with the scene it belongs to, so a change
+ * of scene resets it on read — no hook, nothing to miss if a GM swaps scenes
+ * mid-fight or reloads.
+ */
+function strainScene() {
+  return game.scenes?.current?.id ?? game.scenes?.viewed?.id ?? "no-scene";
+}
+
+/** Prior castings of this spell in the current scene. */
+function strainCount(item) {
+  const s = item.getFlag("vanity", "strain");
+  return s?.scene === strainScene() ? Number(s.casts) || 0 : 0;
+}
+
+/** Threshold as it stands now: printed Threshold + 1 per prior casting. */
+function effectiveThreshold(item) {
+  return (Number(item.system.threshold) || 1) + strainCount(item);
+}
+
+/** Remember a casting. Called only once the dice have actually been rolled. */
+async function addStrain(item) {
+  return item.setFlag("vanity", "strain", { scene: strainScene(), casts: strainCount(item) + 1 });
+}
+
+/** Let the Weave settle — clears strain on every spell an actor carries. */
+async function clearStrain(actor) {
+  const strained = actor.items.filter(i => i.type === "spell" && i.getFlag("vanity", "strain"));
+  for (const i of strained) await i.unsetFlag("vanity", "strain");
+  return strained.length;
+}
+
 /**
  * The pool-builder dialog: situational dice, Vanity spend, Rattled penalty.
  */
@@ -616,8 +655,10 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
     ctx.armour = items.filter(i => i.type === "armour");
     ctx.gear = items.filter(i => i.type === "gear");
     ctx.spells = items.filter(i => i.type === "spell").map(s => ({
-      item: s, listLabel: SPELL_LISTS[s.system.list]?.label ?? s.system.list
+      item: s, listLabel: SPELL_LISTS[s.system.list]?.label ?? s.system.list,
+      strain: strainCount(s), threshold: effectiveThreshold(s)
     }));
+    ctx.strained = ctx.spells.some(s => s.strain > 0);
     ctx.edges = items.filter(i => i.type === "edge");
     ctx.vices = items.filter(i => i.type === "vice");
     ctx.hasSpells = ctx.spells.length > 0;
@@ -768,7 +809,7 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
     });
 
     // Spell cast
-    html.find(".item-cast").click(ev => {
+    html.find(".item-cast").click(async ev => {
       const item = actor.items.get(ev.currentTarget.closest("[data-item-id]").dataset.itemId);
       if (!item) return;
       if (item.system.spent) return ui.notifications.warn(`${item.name} is spent — recover it with a rest or ritual.`);
@@ -777,13 +818,16 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
       const locked = actor.system.locked;
       const knackDice = Number(locked.rank) || 0;
       const flavor = (item.system.description ?? "").match(/<i>(.*?)<\/i>/)?.[1] ?? "";
-      promptAndRoll(actor, {
+      const prior = strainCount(item);
+      const threshold = effectiveThreshold(item);
+      const rolled = await promptAndRoll(actor, {
         title: `Cast ${item.name}`,
         base: attr + knackDice,
-        baseLabel: `${ATTRIBUTES[listDef.attr].label} ${attr} + ${locked.name || listDef.knack} ${knackDice} · Threshold ${item.system.threshold}`,
+        baseLabel: `${ATTRIBUTES[listDef.attr].label} ${attr} + ${locked.name || listDef.knack} ${knackDice} · Threshold ${threshold}`
+          + (prior ? ` <span class="strained">(the Weave strains — +${prior})</span>` : ""),
         options: {
           context: "spell",
-          threshold: Number(item.system.threshold) || 1,
+          threshold,
           spellUuid: item.uuid,
           spell: {
             img: item.img,
@@ -795,6 +839,16 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
           }
         }
       });
+      // Only a casting that actually reached the dice strains the Weave —
+      // a cancelled dialog costs nothing.
+      if (rolled) await addStrain(item);
+    });
+
+    // Let the Weave settle — clear this scene's strain (§17)
+    html.find(".strain-reset").click(async () => {
+      const n = await clearStrain(actor);
+      if (!n) return ui.notifications.info(`The Weave is already quiet around ${actor.name}.`);
+      ui.notifications.info(`The Weave settles — strain cleared on ${n} spell${n > 1 ? "s" : ""}.`);
     });
 
     // Spell recover / spend toggle
@@ -828,9 +882,10 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
       const g = actor.system.grit;
       if (g.value >= g.max) return ui.notifications.info(`${actor.name} is already at full Grit.`);
       await actor.update({ "system.grit.value": Math.min(g.max, g.value + 2) });
+      const settled = await clearStrain(actor);
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor }),
-        content: `<div class="vanity-roll vanity-forge-card"><p><b>${actor.name}</b> catches their breath — <b>+2 Grit</b> (${actor.system.grit.value}/${g.max}).</p></div>`
+        content: `<div class="vanity-roll vanity-forge-card"><p><b>${actor.name}</b> catches their breath — <b>+2 Grit</b> (${actor.system.grit.value}/${g.max})${settled ? `, and <b>the Weave settles</b>` : ""}.</p></div>`
       });
     });
 
@@ -841,9 +896,10 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
       await actor.update({ "system.grit.value": g.max, "system.karma": karma });
       const spent = actor.items.filter(i => i.type === "spell" && i.system.spent);
       if (spent.length) await actor.updateEmbeddedDocuments("Item", spent.map(i => ({ _id: i.id, "system.spent": false })));
+      const settled = await clearStrain(actor);
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor }),
-        content: `<div class="vanity-roll vanity-forge-card"><p><b>${actor.name}</b> takes a proper rest: <b>Grit restored</b> (${g.max}/${g.max}), <b>1 Bane cleared</b> (tab ${karma})${spent.length ? `, <b>${spent.length} spell${spent.length > 1 ? "s" : ""} recovered</b>` : ""}.</p></div>`
+        content: `<div class="vanity-roll vanity-forge-card"><p><b>${actor.name}</b> takes a proper rest: <b>Grit restored</b> (${g.max}/${g.max}), <b>1 Bane cleared</b> (tab ${karma})${spent.length ? `, <b>${spent.length} spell${spent.length > 1 ? "s" : ""} recovered</b>` : ""}${settled ? `, <b>the Weave settled</b>` : ""}.</p></div>`
       });
     });
 
