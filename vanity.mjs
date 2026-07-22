@@ -376,7 +376,7 @@ function renderRollCard({ label, sublabel, results, threshold, pushed, context, 
       ? `<div class="vanity-buttons twist-row"><button type="button" class="vanity-twist free" data-free="true"><i class="fa-solid fa-dice"></i> GM: Twist the Knife — free d66</button></div>`
       : twistUsed ? `<div class="twist-spent">The knife has been twisted.</div>` : ""}
     ${spellScaling}
-    ${targetBlock(target, results, spend)}
+    ${targetBlock(target, results, spend, context)}
     ${extra ? `<div class="vanity-extra">${extra}</div>` : ""}
     ${specials}
     ${buttons ? `<div class="vanity-buttons">${buttons}</div>` : ""}
@@ -389,11 +389,14 @@ function renderRollCard({ label, sublabel, results, threshold, pushed, context, 
  * charge of the fiction — Subdue, mercy and "he was already down" all live in
  * the beat between the roll and the click.
  */
-function targetBlock(target, results, spend) {
+function targetBlock(target, results, spend, context = "attack") {
   if (!target) return "";
   const successes = results.filter(r => r >= 5).length;
   const net = Math.max(0, successes - (spend?.defence ?? target.successes ?? 0));
-  const damage = spend?.damage ?? 0;
+  // In an exchange the first net Success IS the hit — 1 Grit before anything is
+  // bought. Only a spell starts from nothing, because its Threshold bought the
+  // effect instead. Mirrors the arithmetic in renderSpendPanel.
+  const damage = net > 0 ? (context === "spell" ? 0 : 1) + (spend?.damage ?? 0) : 0;
   const pips = (target.results ?? []).map(r =>
     `<span class="d ${r >= 5 ? "hit" : r === 1 ? "one" : ""}">${DIE_FACES[r] ?? r}</span>`).join("");
   const pierceNote = target.piercing
