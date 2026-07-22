@@ -2797,7 +2797,7 @@ const CROWN_NPCS = [
   { name: "The Pale Stranger", img: "icons/magic/death/grave-tombstone-glow-teal.webp",
     role: "Vesper Kound's agent, posing as a pilgrim",
     line: "Too clean, too calm, asks too many questions about the barrow road. This is one of Vesper's people — sent to see who else is hunting the crown.",
-    trick: "Reaction roll at −1 die. If rumbled, bolts for the square and blows a whistle — begins Act Two." }
+    trick: "Reaction roll at −1 die. If rumbled, breaks for the forest road blowing a bone whistle — begins Act Two." }
 ];
 
 async function makeAdventureNpc(def, folderId) {
@@ -2894,10 +2894,13 @@ async function stageVainCrown() {
         <li><b>Act III — The Whispering Wood</b> (${sceneLink(forest)}): the forest road to the barrow, and what hunts it.</li>
         <li><b>Act IV — The Barrow of King Aldric</b> (${sceneLink(barrow)}): the crypt, the throne, and the crown that admires you back.</li>
       </ul>
+      <h2>What is actually happening <span style="font-weight:normal">(GM's truth)</span></h2>
+      <p>The crown makes its wearer irresistibly admired, and it has never stopped doing it. A year under a hill admired by nobody has made it <i>hungry</i>, and the hunger has been soaking into the dead king like water into chalk. <b>Aldric is waking because the crown cannot bear to go unwitnessed.</b> That is the whole cosmology, and the game's thesis: vanity is a debt, and someone always collects.</p>
+      <p><b>Where Vesper is:</b> one step ahead all evening — at the door while the party is on the green, in the crypt while they are in the wood, at the throne as they come down the stair. A fast party catches him still working the sigil: a different shape of finale, the same heart.</p>
       <p><b>Every map is a live Foundry scene</b> with walls, doors and daylight/fog set; <b>every name is a token already placed.</b> Nudge the tokens where you want them and press play.</p>`, 0),
 
     page("Act I · Nettlebrook", `
-      ${box("Nettlebrook is three streets, a green, a well, and a chapel the size of a shed. The reeve is waiting on the green in a velvet cap he plainly cannot afford, and he is very glad to see anyone at all carrying a weapon.")}
+      ${box("<i>Read aloud — arrival:</i> Nettlebrook is three streets, a green, a well, and a chapel the size of a shed. The reeve is waiting on the green in a velvet cap he plainly cannot afford, and he is very glad to see anyone at all carrying a weapon.")}
       <p>Scene: ${sceneLink(village)} — daylight, no fog, freely walkable. Four faces to play:</p>
       <ul>
         <li>${npcLink(npcs[0])} — <i>${CROWN_NPCS[0].role}.</i> ${CROWN_NPCS[0].trick}</li>
@@ -2905,43 +2908,62 @@ async function stageVainCrown() {
         <li>${npcLink(npcs[2])} — <i>${CROWN_NPCS[2].role}.</i> ${CROWN_NPCS[2].trick}</li>
         <li>${npcLink(npcs[3])} — <i>${CROWN_NPCS[3].role}.</i> ${CROWN_NPCS[3].trick}</li>
       </ul>
-      <p><b>Rolls that matter:</b> a <b>Reaction</b> (§24) for the Pale Stranger at −1 die; <b>Charm/Command</b> to open the reeve's purse wider; <b>Notice/Lore</b> to realise the 'pilgrim' is nothing of the kind. The moment the party corners the Stranger, they whistle and run — <b>go to Act II.</b></p>`, 100),
+      ${box("<i>Read aloud — the reeve's offer:</i> Forty gold. Half now, half when the hill is quiet again. And quietly, if you'd be so kind — Nettlebrook's a good name and I'd like to keep it.")}
+      ${box("<i>Read aloud — Brother Cassian, at the chapel door:</i> Put him back properly, that's all I ask. The boy was vain, not evil. There's a difference, and it matters.")}
+      <p><b>Running the act.</b> No fail state — the whistle blows whether or not the party earns a thing. Play the faces warm and let people show off: grandstanding is Vanity, and Vanity is what makes Act Four hurt. If the table stalls, move the Stranger.</p>
+      <p><b>Rolls that matter:</b> a <b>Reaction</b> (§24) for the Pale Stranger at −1 die; <b>Charm/Command</b> to open the reeve's purse wider; <b>Notice/Lore</b> to realise the 'pilgrim' is nothing of the kind. The moment the party corners the Stranger, they whistle and run — <b>go to Act II.</b></p>
+      ${box("<i>Read aloud — the act break:</i> The pilgrim stops mid-sentence and looks at you the way a man looks at a sum he has just finished adding up. Then he runs, and somewhere behind the well-house a bone whistle goes up.")}`, 100),
 
     page("Act II · The Green", `
-      ${box("A whistle, then screaming. Vesper left a handful of hard men in the village to keep it frightened — and something worse on a leash. They break cover from the alleys and the well-house, and a villager is already down in the mud.")}
+      ${box("<i>Read aloud — the whistle:</i> A whistle, then screaming. Vesper left a handful of hard men in the village to keep it frightened — and something worse on a leash. They break cover from the alleys and the well-house, and a villager is already down in the mud.")}
       <p>Scene: ${sceneLink(square)}. <b>Foes:</b> ${bandits.map(npcLink).join(" · ")} and ${npcLink(wolf1)}.</p>
       <ul>
         <li><b>Bandits</b> (attack 3d, leather, Grit 2): flee when half are down or the wolf falls.</li>
         <li><b>Dire Wolf</b> (attack 4d, dodge 4d, Grit 5): <i>Knock Down free on a hit.</i> Vesper's sentry-beast.</li>
         <li><b>The green</b> is cover country — the well, carts, and building corners. Reward <b>Environment</b> maneuvers and grandstanding (Vice bait, +1 Vanity).</li>
       </ul>
+      ${box("<i>Read aloud — the wolf comes off the rope:</i> The handler drops the rope rather than be dragged by it. The wolf doesn't charge at once. It picks one of you first, and <i>then</i> it charges.")}
+      <p><b>Running the fight.</b> The bandits are debts with faces; <b>the wolf is the fight</b>. Keep saying <i>audience</i> — every window turns a maneuver into a performance and a Stumble into a story; pay Vanity for any risk taken for a bystander. <b>Failure case:</b> if the party is genuinely losing, a villager's roof-tile finishes the wolf and the rest break.</p>
       <p>Take one bandit alive and they'll talk: Vesper rode for the barrow at dawn, by the forest road, 'and good luck to you on it.' <b>Go to Act III.</b></p>`, 200),
 
     page("Act III · The Whispering Wood", `
-      ${box("The barrow sits deep in the old wood, and the wood knows it. The path is there for those who can read it; off the path, the trees close ranks and things move that a year of the dead king's dreaming has made bold.")}
+      ${box("<i>Read aloud — into the trees:</i> The barrow sits deep in the old wood, and the wood knows it. The path is there for those who can read it; off the path, the trees close ranks and things move that a year of the dead king's dreaming has made bold.")}
       <p>Scene: ${sceneLink(forest)} — daylight, thickets block sight and step, a path winds east to a <b>clearing with the barrow mouth</b>.</p>
       <ul>
         <li><b>Wildcraft / Survive</b> holds the path (a Ranger auto-succeeds; others need 2 Successes or lose an hour and draw the swarm).</li>
         <li><b>Beasts:</b> ${forestWolves.map(npcLink).join(" · ")} — a hunting pack; ${npcLink(batSwarm)} in the deep shade; ${rats.map(npcLink).join(" · ")} boiling from a rotten log.</li>
-        <li><i>Vanity bait:</i> the flashy open-water shortcut back on the fen is faster and watched. Staying on the forest road is slower and safer — let pride choose.</li>
+        <li><b>The fork:</b> where the path bends, a second way runs north over <b>open water</b> — a drowned causeway across the fen, quicker, glittering and completely exposed. That is the road Marrow warned them off in Act I.</li>
+        <li><i>Vanity bait:</i> the causeway is faster and watched by the rest of the wolf pack. Staying on the forest road is slower and safer — let pride choose.</li>
       </ul>
+      ${box("<i>Read aloud — the wood's warning:</i> The birdsong stops in bands, like you're crossing borders somebody drew. Behind you it starts up again. Ahead of you it doesn't.")}
+      <p><b>Running the walk.</b> Pressure, not a maze: a failed roll never means <i>lost forever</i>, it means the lost hour — and the hour is real, because Vesper gets ahead and the party arrives to a door already open. Say the fork's two options plainly, then say nothing; the silence is the test.</p>
+      ${box("<i>Read aloud — arrival:</i> The trees simply end. A clearing, a green hill with a stone mouth set in it, and cold air coming out of that mouth on a warm afternoon.")}
       <p>The path ends at the clearing and the dark mouth of the barrow. <b>Go to Act IV.</b></p>`, 300),
 
     page("Act IV · The Barrow of King Aldric", `
-      ${box("Cold air breathes out of the hill. Somewhere below, a sorcerer is working, and a dead boy-king is beginning to remember that he was beautiful.")}
+      ${box("<i>Read aloud — the mouth:</i> Cold air breathes out of the hill. Somewhere below, a sorcerer is working, and a dead boy-king is beginning to remember that he was beautiful.")}
       <p>Scene: ${sceneLink(barrow)} — rooms, doors and torchlight; token vision and fog on.</p>
       <h3>The Sealed Door</h3>
+      ${box("<i>Read aloud — the threshold:</i> Two men lie at the door. One has a dart through his throat. The other has no mark on him at all — he sat down against the stone and stopped.")}
       <p>The mouth is a slab bound by a glowing <b>arcane sigil</b> (only <b>Arcana</b>, Threshold 2 — failure locks the spell and jolts everyone 2 Grit) <b>and</b> a mundane <b>trapped lock</b> beneath (only <b>Larceny</b> + thieves' tools — a failed roll springs a dart, a Wound). Two keys, two classes.</p>
+      <p><b>If a key is down or missing</b> (the Mage Taken Out on the green, no Rogue at the table), the other art may be <i>attempted</i> by a proxy at <b>+1 Threshold</b> using Vesper's dropped notes from a threshold corpse — slower and costlier, never a stonewall. <b>The door never ends the adventure.</b></p>
       <h3>The Crypt of Servants</h3>
+      ${box("<i>Read aloud — the niches:</i> The dust in the burial niches shifts. Not all at once — one after another, politely, like a household rising to greet a guest.")}
       <p>${skeletons.map(npcLink).join(" · ")} and ${ghouls.map(npcLink).join(" · ")} rise as the party crosses. The <b>Cleric's Turn Undead</b> sweeps the skeletons; the <b>Ghouls' paralysing claws</b> are the real danger, and the <b>Warrior</b> must hold the choke while the soft classes work.</p>
       <h3>The Peacock Throne</h3>
+      ${box("<i>Read aloud — the throne:</i> The crown is in the sorcerer's hands, lifted off a dead brow a heartbeat ago, and it is beginning to shine. On the throne, something that was beautiful once opens its eyes.")}
       <p>${npcLink(vesper)} has beaten the party here and just <b>woken ${npcLink(aldric)} by mistake</b>. Two-sided fight:</p>
       <ul>
         <li><b>Vesper Kound</b> (Necromancer, Grit 6): Firebolt, Sleep, raises fallen Skeletons; parleys or flees if losing — a live villain for later.</li>
-        <li><b>King Aldric, the Vain Corpse</b> (<b>Nemesis</b>, Grit 14, Resolve 3): spectral blade ignores armour; <b>Aura of Admiration</b> — look at the crown, resist with Poise or waste your action gazing; <b>Phase 2 at Grit 7</b> — the crown blazes and he attacks twice. Cap single hits at 4.</li>
+        <li><b>King Aldric, the Vain Corpse</b> (<b>Nemesis</b>, Grit 14, Resolve 3): spectral blade ignores armour; <b>Aura of Admiration</b> — look at the crown, resist with Poise or waste your action gazing (<i>cadence: two characters per round, nobody twice in a phase — rolling it for everyone every round stalls the fight</i>); <b>Phase 2 at Grit 7</b> — the crown blazes and he attacks twice. Cap single hits at 4.</li>
       </ul>
+      <p><b>Play Aldric slow, beautiful and sad.</b> He does not rage; he <i>poses</i>, adjusting the crown between attacks. Show the spectral blade before you aim it — the first strike passes clean through a raised shield, in front of everyone — then target whoever adores him, never the frail by preference. He gets one line, early, in a voice like a portrait talking. No roll answers it:</p>
+      ${box("<i>Read aloud — Aldric:</i> Have you come to look at me?")}
+      <p><b>The fight is meant to be won</b>, in five or six rounds. The real finale is the quarter-hour after.</p>
       <h3>The spoils</h3>
       <p>Vesper's grave-loot (the Vault hoard rolled to chat), and — if they dare — <b>The Peacock Crown</b>: a permanent +1 die to Charm, an unrefusable <b>Vice: Pride</b>, and a standing Bane. Keeping it, destroying it, or reburying it beside the boy-king is the note the whole adventure has been playing toward.</p>
+      <p><b>Running the choice.</b> Put the crown in the middle of the table and stop narrating; let the silence work before you spend Cassian's plea, the reeve's forty gold or Vesper's collector on it. If anyone reaches for dice: <b>no roll resolves this one.</b></p>
+      ${box("<i>Read aloud — the road home:</i> The birds are back in the wood, which is how you know it's over. Or that it thinks it is. In Nettlebrook they'll tell this story wrong within a season — only you know what was offered in the dark under the hill, and what it cost to answer.")}
       <p><b>Rewards:</b> 2–3 Glory each. And whatever the crown costs.</p>`, 400)
   ];
 
