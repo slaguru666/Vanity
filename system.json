@@ -2,7 +2,7 @@
   "id": "vanity",
   "title": "VANITY — the Vanity Role-Playing Game",
   "description": "A generic d6 RPG where ego is a resource and the universe keeps score. Pool = Attribute + Knack + situation; 5–6 = a Success; fail with two 1s = a Stumble that banks a Bane of Karma (Draft 13). No hit points — Grit. Vanity, Karma and Glory drive play. Includes the full Draft 13 rulebook, all spells and gear, the starter bestiary, a 100-item Treasures & Relics library, twenty ready-to-play characters (each with cameo art, token and backstory), ten animal companions with the d10 Bond table and the one-shot adventure The Vain Crown.",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "compatibility": {
     "minimum": 13,
     "verified": "14.364"
