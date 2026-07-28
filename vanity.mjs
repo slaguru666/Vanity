@@ -287,7 +287,7 @@ class VanityActor extends Actor {
         <div class="vanity-buttons">
           ${karma >= 6
             ? `<button type="button" class="vanity-reckon" data-actor-uuid="${this.uuid}"><i class="fa-solid fa-skull"></i> GM: THE RECKONING — roll 2d6, wipe the tab</button>`
-            : `<button type="button" class="vanity-twist" data-actor-uuid="${this.uuid}"><i class="fa-solid fa-dice"></i> GM: Twist the Knife — roll the d66</button>`}
+            : `<button type="button" class="vanity-twist" data-actor-uuid="${this.uuid}"><i class="fa-solid fa-dice"></i> GM: Twist the Knife — roll 2d6</button>`}
         </div>
       </div>`
     });
@@ -295,6 +295,16 @@ class VanityActor extends Actor {
 }
 
 class VanityItem extends Item {}
+
+/** The Draw with Momentum: a hero who earned Momentum (a 3+ Success roll) adds dice
+ *  to their next initiative and keeps the highest. Consumed as it is rolled. */
+class VanityCombatant extends foundry.documents.Combatant {
+  _getInitiativeFormula() {
+    const m = Math.max(0, Math.floor(this.actor?.system?.momentum ?? 0));
+    if (m > 0 && this.actor?.isOwner) this.actor.update({ "system.momentum": 0 }).catch(() => {});
+    return m > 0 ? `${1 + m}d6kh1` : (CONFIG.Combat.initiative?.formula || "1d6");
+  }
+}
 
 /* -------------------------------------------- */
 /*  The dice engine                              */
@@ -315,10 +325,21 @@ function renderDice(results) {
 /**
  * Build the chat-card HTML for a pool roll.
  */
-function renderRollCard({ label, sublabel, results, threshold, pushed, context, extra, spend, banked = 0, twistUsed = false, spell = null, target = null }) {
-  const successes = results.filter(r => r >= 5).length;
-  const ones = results.filter(r => r === 1).length;
-  const stumble = successes === 0 && ones >= 2;
+/** The tab, resolved (Draft 14.1). Two+ fails threaten a Bane regardless of Successes;
+ *  a player may burn 1 Success to cancel one fail (drop below two dodges the Bane). A
+ *  single remaining fail is the GM's free Twist. `canceled` = fails cancelled so far. */
+function baneState(results, canceled = 0) {
+  const rawSucc = results.filter(r => r >= 5).length;
+  const rawOnes = results.filter(r => r === 1).length;
+  const succ = Math.max(0, rawSucc - canceled);
+  const ones = Math.max(0, rawOnes - canceled);
+  return { rawSucc, rawOnes, canceled, succ, ones,
+           threat: ones >= 2, canBurn: ones >= 2 && succ >= 1, singleFail: ones === 1 };
+}
+
+function renderRollCard({ label, sublabel, results, threshold, pushed, context, extra, spend, canceled = 0, baneResolved = null, isChar = false, twistUsed = false, spell = null, target = null }) {
+  const st = baneState(results, canceled);
+  const successes = st.succ;
   const met = threshold ? successes >= threshold : successes >= 1;
 
   let outcome;
@@ -344,6 +365,26 @@ function renderRollCard({ label, sublabel, results, threshold, pushed, context, 
     ? renderSpendPanel({ successes, spend, sublabel, menu: menuFor(context), context, threshold })
     : "";
 
+  // ── the tab ── 2+ fails threaten a Bane (burn 1 Success to cancel one); a single fail is a free twist.
+  const pending = isChar && st.threat && baneResolved !== "banked" && baneResolved !== "cleared";
+  let baneUI = "";
+  if (isChar && baneResolved === "banked") {
+    baneUI = `<div class="vanity-outcome"><span class="banes">· ${st.canceled ? `burned ${st.canceled} Success${st.canceled > 1 ? "es" : ""}, then ` : ""}the tab grows — <b>+1 Bane</b> banked</span></div>`;
+  } else if (pending) {
+    const burn = st.canBurn
+      ? `<button type="button" class="vanity-burn"><i class="fa-solid fa-fire-flame-simple"></i> Burn a Success</button>`
+      : "";
+    baneUI = `<div class="vanity-bane-choice">
+      <span class="warn"><i class="fa-solid fa-triangle-exclamation"></i> <b>${st.ones} fails</b> — the tab threatens a <b>Bane</b>.${st.canBurn ? " Burn a Success to cancel one, or take it." : " No Success to spare — it banks."}</span>
+      <div class="vanity-buttons">${burn}<button type="button" class="vanity-takebane"><i class="fa-solid fa-skull"></i> Take the Bane</button></div>
+    </div>`;
+  } else if (isChar && baneResolved === "cleared") {
+    baneUI = `<div class="vanity-outcome"><span class="banes soft">· burned ${st.canceled} Success${st.canceled > 1 ? "es" : ""} — the tab stays clean</span></div>`;
+  }
+  const freeTwist = isChar && st.singleFail && !twistUsed && !pending && baneResolved !== "banked"
+    ? `<div class="vanity-buttons twist-row"><button type="button" class="vanity-twist free" data-free="true"><i class="fa-solid fa-dice"></i> GM: Twist the Knife — free 2d6</button></div>`
+    : (twistUsed ? `<div class="twist-spent">The knife has been twisted.</div>` : "");
+
   const spellBanner = spell ? `
     <div class="vanity-spellcard ${spell.school ?? ""}">
       <img src="${spell.img}" alt="">
@@ -367,16 +408,14 @@ function renderRollCard({ label, sublabel, results, threshold, pushed, context, 
     <div class="vanity-dice">${renderDice(results)}</div>
     <div class="vanity-outcome">
       ${outcome}
-      ${stumble
-        ? `<span class="banes">· a STUMBLE${banked ? " — 1 Bane banked" : ""}</span>`
-        : ones ? `<span class="banes soft">· ${ones === 1 ? "a lone 1" : `${ones} ones`} — the GM may twist the knife now</span>` : ""}
+      ${st.ones && !pending && baneResolved !== "banked" && baneResolved !== "cleared"
+        ? `<span class="banes soft">· ${st.ones === 1 ? "a lone 1 — a single fail" : `${st.ones} ones`}</span>` : ""}
       ${pushed ? `<span class="pushed">· Pushed</span>` : ""}
     </div>
-    ${!stumble && ones && !twistUsed
-      ? `<div class="vanity-buttons twist-row"><button type="button" class="vanity-twist free" data-free="true"><i class="fa-solid fa-dice"></i> GM: Twist the Knife — free d66</button></div>`
-      : twistUsed ? `<div class="twist-spent">The knife has been twisted.</div>` : ""}
+    ${baneUI}
+    ${freeTwist}
     ${spellScaling}
-    ${targetBlock(target, results, spend, context)}
+    ${targetBlock(target, results, spend, context, canceled)}
     ${extra ? `<div class="vanity-extra">${extra}</div>` : ""}
     ${specials}
     ${buttons ? `<div class="vanity-buttons">${buttons}</div>` : ""}
@@ -389,9 +428,9 @@ function renderRollCard({ label, sublabel, results, threshold, pushed, context, 
  * charge of the fiction — Subdue, mercy and "he was already down" all live in
  * the beat between the roll and the click.
  */
-function targetBlock(target, results, spend, context = "attack") {
+function targetBlock(target, results, spend, context = "attack", canceled = 0) {
   if (!target) return "";
-  const successes = results.filter(r => r >= 5).length;
+  const successes = Math.max(0, results.filter(r => r >= 5).length - canceled);
   const net = Math.max(0, successes - (spend?.defence ?? target.successes ?? 0));
   // In an exchange the first net Success IS the hit — 1 Grit before anything is
   // bought. Only a spell starts from nothing, because its Threshold bought the
@@ -468,11 +507,16 @@ async function rollPool(actor, pool, label, options = {}) {
   lockVanityDice(roll);
   const results = roll.dice[0].results.map(r => r.result);
 
-  // The Stumble (Draft 11): bank 1 Bane only on a failed roll with two or more 1s.
-  const ones = results.filter(r => r === 1).length;
-  const successes = results.filter(r => r >= 5).length;
-  const stumble = successes === 0 && ones >= 2;
-  const banked = stumble && actor?.type === "character" ? 1 : 0;
+  // Two or more fails threaten a Bane regardless of Successes. If the roller can burn
+  // (1 Success cancels one fail) they decide on the card; if not, it banks automatically.
+  // A single fail is the GM's free twist, not a Bane.
+  const isChar = actor?.type === "character";
+  const st = baneState(results, 0);
+  let baneResolved = null, autoBank = 0;
+  if (isChar && st.threat) {
+    if (st.canBurn) baneResolved = null;              // pending — the player chooses
+    else { baneResolved = "banked"; autoBank = 1; }   // no Success to burn — it banks
+  }
 
   const flags = {
     vanity: {
@@ -486,7 +530,9 @@ async function rollPool(actor, pool, label, options = {}) {
       actorUuid: actor?.uuid ?? "",
       pushed: false,
       extra: "",
-      banked,
+      canceled: 0,
+      baneResolved,
+      isChar,
       spell: options.spell ?? null,
       target: options.target ?? null,
       spend: options.spend ?? { defence: 0, damage: 0, maneuvers: [] }
@@ -499,12 +545,26 @@ async function rollPool(actor, pool, label, options = {}) {
     sound: CONFIG.sounds.dice,
     content: renderRollCard({
       label, sublabel: options.sublabel, results, threshold: options.threshold, pushed: false,
-      context: options.context, banked, spell: options.spell ?? null,
+      context: options.context, canceled: 0, baneResolved, isChar, spell: options.spell ?? null,
       target: options.target ?? null, spend: flags.vanity.spend
     }),
     flags
   });
-  if (banked) await actor.addBanes(1, `a Stumble on “${label}”`);
+  if (autoBank) await actor.addBanes(1, `two fails on “${label}”`);
+
+  // Momentum: a roll of 3+ Successes (two beyond the one needed) earns a die on the
+  // next Draw. Caps at +2; a fresh grant only heralds when it actually rises.
+  if (isChar && st.succ >= 3 && options.context !== "draw") {
+    const old = actor.system.momentum ?? 0;
+    const m = Math.min(2, old + 1);
+    if (m > old) {
+      await actor.update({ "system.momentum": m });
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor }),
+        content: `<div class="vanity-roll vanity-momentum"><p>✦ <b>Momentum</b> — ${st.succ} Successes. ${actor.name} carries <b>+${m} die</b> on their next Draw (keep highest).</p></div>`
+      });
+    }
+  }
 }
 
 /* -------------------------------------------- */
@@ -680,16 +740,19 @@ async function handlePush(message) {
     if (game.dice3d) await game.dice3d.showForRoll(roll, game.user, true);
   }
 
-  // Push costs 1 Bane; a pushed roll that STILL fails with two or more 1s Stumbles for another.
-  const successes = newResults.filter(r => r >= 5).length;
-  const ones = newResults.filter(r => r === 1).length;
-  const pushedStumble = successes === 0 && ones >= 2;
+  // The Push always bills 1 Bane (chosen hubris). The pushed result's 2+ fails then
+  // threaten a further Bane, which the player may burn a Success to dodge on the card.
   const isCharacter = actor?.type === "character";
-  const paid = 1 + (pushedStumble ? 1 : 0);
-  const banked = pushedStumble && isCharacter ? 1 : 0;
+  const st = baneState(newResults, 0);
+  let baneResolved = null, autoBank = 0;
+  if (isCharacter && st.threat) {
+    if (st.canBurn) baneResolved = null;
+    else { baneResolved = "banked"; autoBank = 1; }
+  }
+  const successes = st.succ;
 
-  let extra = pushedStumble
-    ? `<span class="pushed-note">${game.i18n.localize("VANITY.Pushed")} — and pushed straight into a Stumble (+${paid} Banes).</span>`
+  let extra = autoBank
+    ? `<span class="pushed-note">${game.i18n.localize("VANITY.Pushed")} — and straight into two fails (+2 Banes).</span>`
     : `<span class="pushed-note">${game.i18n.localize("VANITY.Pushed")} (+1 Bane).</span>`;
 
   // A failed Push on a spell is a CATASTROPHE.
@@ -709,16 +772,18 @@ async function handlePush(message) {
   await message.update({
     content: renderRollCard({
       label: f.label, sublabel: f.sublabel, results: newResults,
-      threshold: f.threshold, pushed: true, context: f.context, extra, spend, banked, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null, target: f.target ?? null
+      threshold: f.threshold, pushed: true, context: f.context, extra, spend,
+      canceled: 0, baneResolved, isChar: isCharacter, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null, target: f.target ?? null
     }),
     "flags.vanity.results": newResults,
     "flags.vanity.pushed": true,
     "flags.vanity.extra": extra,
-    "flags.vanity.banked": banked,
+    "flags.vanity.canceled": 0,
+    "flags.vanity.baneResolved": baneResolved,
     "flags.vanity.spend": spend
   });
   if (isCharacter) {
-    await actor.addBanes(paid, pushedStumble ? `Pushed “${f.label}” straight into a Stumble` : `Pushed “${f.label}”`);
+    await actor.addBanes(1 + autoBank, autoBank ? `Pushed “${f.label}” into two fails` : `Pushed “${f.label}”`);
   }
 }
 
@@ -726,7 +791,7 @@ async function handlePush(message) {
 async function handleSpend(message, dataset) {
   const f = message.flags?.vanity;
   if (!f) return;
-  const successes = f.results.filter(r => r >= 5).length;
+  const successes = baneState(f.results, f.canceled ?? 0).succ;
   const spend = { defence: 0, damage: 0, maneuvers: [], ...(f.spend ?? {}) };
 
   if (dataset.def !== undefined) {
@@ -751,10 +816,55 @@ async function handleSpend(message, dataset) {
   await message.update({
     content: renderRollCard({
       label: f.label, sublabel: f.sublabel, results: f.results,
-      threshold: f.threshold, pushed: f.pushed, context: f.context, extra: f.extra, spend, banked: f.banked ?? 0, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null, target: f.target ?? null
+      threshold: f.threshold, pushed: f.pushed, context: f.context, extra: f.extra, spend, canceled: f.canceled ?? 0, baneResolved: f.baneResolved ?? null, isChar: f.isChar, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null, target: f.target ?? null
     }),
     "flags.vanity.spend": spend
   });
+}
+
+/** Burn 1 Success to cancel one fail. Drop below two fails and the Bane is dodged. */
+async function handleBurn(message) {
+  const f = message.flags?.vanity;
+  if (!f || f.baneResolved === "banked" || f.baneResolved === "cleared") return;
+  if (!baneState(f.results, f.canceled ?? 0).canBurn) return;
+  const canceled = (f.canceled ?? 0) + 1;
+  const st = baneState(f.results, canceled);
+  const baneResolved = st.threat ? (f.baneResolved ?? null) : "cleared";
+
+  // Fewer Successes may make a prior attack-spend illegal — trim to the new budget.
+  const spend = { defence: f.spend?.defence ?? 0, damage: f.spend?.damage ?? 0, maneuvers: [...(f.spend?.maneuvers ?? [])] };
+  const budget = f.context === "spell"
+    ? Math.max(0, st.succ - (f.threshold || 1))
+    : Math.max(0, st.succ - spend.defence - 1);
+  const cost = spend.damage + spend.maneuvers.reduce((n, k) => n + (menuFor(f.context).find(m => m.key === k)?.cost ?? 0), 0);
+  if (cost > budget) { spend.damage = 0; spend.maneuvers = []; }
+
+  await message.update({
+    content: renderRollCard({
+      label: f.label, sublabel: f.sublabel, results: f.results, threshold: f.threshold,
+      pushed: f.pushed, context: f.context, extra: f.extra, spend,
+      canceled, baneResolved, isChar: f.isChar, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null, target: f.target ?? null
+    }),
+    "flags.vanity.canceled": canceled,
+    "flags.vanity.baneResolved": baneResolved,
+    "flags.vanity.spend": spend
+  });
+}
+
+/** Accept the Bane rather than burn Successes: the tab grows by one. */
+async function handleTakeBane(message) {
+  const f = message.flags?.vanity;
+  if (!f || f.baneResolved === "banked" || f.baneResolved === "cleared") return;
+  await message.update({
+    content: renderRollCard({
+      label: f.label, sublabel: f.sublabel, results: f.results, threshold: f.threshold,
+      pushed: f.pushed, context: f.context, extra: f.extra, spend: f.spend,
+      canceled: f.canceled ?? 0, baneResolved: "banked", isChar: f.isChar, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null, target: f.target ?? null
+    }),
+    "flags.vanity.baneResolved": "banked"
+  });
+  const actor = f.actorUuid ? await fromUuid(f.actorUuid) : null;
+  if (actor?.type === "character") await actor.addBanes(1, `two fails on “${f.label}”`);
 }
 
 async function handleFizzle(message) {
@@ -768,7 +878,7 @@ async function handleFizzle(message) {
   await message.update({
     content: renderRollCard({
       label: f.label, sublabel: f.sublabel, results: f.results,
-      threshold: f.threshold, pushed: true, context: f.context, extra, banked: f.banked ?? 0, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null, target: f.target ?? null
+      threshold: f.threshold, pushed: true, context: f.context, extra, canceled: f.canceled ?? 0, baneResolved: f.baneResolved ?? null, isChar: f.isChar, twistUsed: f.twistUsed ?? false, spell: f.spell ?? null, target: f.target ?? null
     }),
     "flags.vanity.pushed": true,
     "flags.vanity.extra": extra
@@ -953,9 +1063,18 @@ class VanityActorSheet extends foundry.appv1.sheets.ActorSheet {
     html.find(".roll-draw").click(async () => {
       if (actor.inCombat) {
         const c = game.combat?.combatants.find(c => c.actorId === actor.id);
-        if (c) return game.combat.rollInitiative([c.id]);
+        if (c) return game.combat.rollInitiative([c.id]);   // VanityCombatant folds in Momentum
       }
-      await rollPool(actor, 1, "The Draw (initiative)", { sublabel: "act highest to lowest — reroll each round" });
+      // Out of combat: 1d6 + any Momentum dice, keep the highest; consume the Momentum.
+      const m = Math.max(0, Math.floor(actor.system.momentum ?? 0));
+      const roll = new Roll(`${1 + m}d6kh1`);
+      await roll.evaluate();
+      lockVanityDice(roll);
+      if (m) await actor.update({ "system.momentum": 0 });
+      await roll.toMessage({
+        speaker: ChatMessage.getSpeaker({ actor }),
+        flavor: `The Draw (initiative)${m ? ` — +${m} Momentum` : ""} · act highest to lowest`
+      });
     });
 
     // Weapon attack
@@ -1321,7 +1440,7 @@ Hooks.on("diceSoNiceRollStart", (messageId, context) => {
 /*  Twist the Knife — the GM spends the tab      */
 /* -------------------------------------------- */
 
-const TWIST_TABLE_NAME = "Twist the Knife — spending Banes (d66)";
+const TWIST_TABLE_NAME = "Twist the Knife — a single fail (2d6)";
 const RECKONING_TABLE_NAME = "THE RECKONING — the tab reads six (2d6)";
 const BOND_TABLE_NAME = "The Bond — Animal Companions (d10)";
 
@@ -1387,7 +1506,7 @@ async function twistTheKnife({ actorUuid = "", free = false, sourceMessage = nul
   const table = await getVanityTable(TWIST_TABLE_NAME);
   if (!table) return ui.notifications.error(`"${TWIST_TABLE_NAME}" not found in world or compendium.`);
 
-  const roll = new Roll("1d6*10 + 1d6");
+  const roll = new Roll("2d6");
   await roll.evaluate();
   await showBaneDice(roll);
   // table.draw({roll}) re-rolls internally — map our roll to its result so the red dice
@@ -1415,7 +1534,7 @@ async function twistTheKnife({ actorUuid = "", free = false, sourceMessage = nul
       content: renderRollCard({
         label: f.label, sublabel: f.sublabel, results: f.results, threshold: f.threshold,
         pushed: f.pushed, context: f.context, extra: f.extra, spend: f.spend,
-        banked: f.banked ?? 0, twistUsed: true, spell: f.spell ?? null, target: f.target ?? null
+        canceled: f.canceled ?? 0, baneResolved: f.baneResolved ?? null, isChar: f.isChar, twistUsed: true, spell: f.spell ?? null, target: f.target ?? null
       })
     });
   }
@@ -2039,6 +2158,7 @@ Hooks.once("init", () => {
   CONFIG.specialStatusEffects.DEFEATED = "taken-out";
 
   CONFIG.Actor.documentClass = VanityActor;
+  CONFIG.Combatant.documentClass = VanityCombatant;
   CONFIG.Item.documentClass = VanityItem;
   CONFIG.Combat.initiative = { formula: "1d6", decimals: 0 };
 
@@ -2106,6 +2226,52 @@ Hooks.on("combatRound", async (combat, updateData, updateOptions) => {
   await combat.rollAll();
 });
 
+/* Make an Entrance — promote a combatant to the top of The Draw without re-rolling
+ * for a 6. Right-click a combatant in the tracker. */
+function combatantIdFromEntry(li) {
+  const el = li?.[0] ?? li;
+  return el?.dataset?.combatantId
+    ?? el?.closest?.("[data-combatant-id]")?.dataset?.combatantId
+    ?? (li?.data ? li.data("combatant-id") : null);
+}
+async function promoteToTop(combatant) {
+  const combat = combatant?.combat ?? game.combat;
+  if (!combat || !combatant) return;
+  const top = Math.max(0, ...combat.combatants.map(c => (Number.isFinite(c.initiative) ? c.initiative : 0)));
+  await combatant.update({ initiative: top + 1 });
+}
+Hooks.on("getCombatTrackerEntryContext", (html, options) => {
+  options.push({
+    name: "VANITY: Go first — make an entrance (1 Vanity)",
+    icon: '<i class="fa-solid fa-crown"></i>',
+    condition: li => {
+      const c = game.combat?.combatants.get(combatantIdFromEntry(li));
+      return !!c && c.actor?.type === "character" && (game.user.isGM || c.actor?.isOwner);
+    },
+    callback: async li => {
+      const c = game.combat?.combatants.get(combatantIdFromEntry(li));
+      if (!c?.actor) return;
+      const van = c.actor.system.vanity ?? 0;
+      if (van < 1) return ui.notifications.warn(`${c.actor.name} has no Vanity to spend on an entrance.`);
+      await c.actor.update({ "system.vanity": van - 1 });
+      await promoteToTop(c);
+      await ChatMessage.create({
+        speaker: { alias: "The Draw" },
+        content: `<div class="vanity-roll vanity-tab-note"><p><b>${c.name}</b> spends <b>1 Vanity</b> and makes an entrance — <b>first in the round</b>.</p></div>`
+      });
+    }
+  });
+  options.push({
+    name: "VANITY: Move to top of the order",
+    icon: '<i class="fa-solid fa-angles-up"></i>',
+    condition: () => game.user.isGM,
+    callback: async li => {
+      const c = game.combat?.combatants.get(combatantIdFromEntry(li));
+      if (c) await promoteToTop(c);
+    }
+  });
+});
+
 /* Chat card buttons. */
 Hooks.on("renderChatMessageHTML", (message, html) => {
   html.querySelectorAll(".vanity-push").forEach(btn => {
@@ -2134,6 +2300,22 @@ Hooks.on("renderChatMessageHTML", (message, html) => {
     btn.addEventListener("click", () => {
       if (!game.user.isGM) return ui.notifications.warn("Only the GM applies damage.");
       applyDamageToTarget(message, Number(btn.dataset.damage) || 0);
+    });
+  });
+  html.querySelectorAll(".vanity-burn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (!game.user.isGM && message.author?.id !== game.user.id) {
+        return ui.notifications.warn("Only the roller (or the GM) may burn Successes.");
+      }
+      handleBurn(message);
+    });
+  });
+  html.querySelectorAll(".vanity-takebane").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (!game.user.isGM && message.author?.id !== game.user.id) {
+        return ui.notifications.warn("Only the roller (or the GM) may take the Bane.");
+      }
+      handleTakeBane(message);
     });
   });
   html.querySelectorAll(".vanity-twist").forEach(btn => {

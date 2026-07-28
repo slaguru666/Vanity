@@ -44,7 +44,7 @@
                 <input class="attr-input" type="number" name="system.attributes.{{key}}.value" value="{{value}}" min="1" max="5" />
               </div>
               {{/each}}
-              <div class="hint">Pool = Attribute + Knack + situation. 5–6 = a Success. Fail with two 1s = a Stumble (1 Bane).</div>
+              <div class="hint">Pool = Attribute + Knack + situation. 5–6 = a Success. Two or more 1s bank a Bane — burn a Success to cancel one.</div>
             </div>
           </div>
 
@@ -80,7 +80,7 @@
                   {{#each karmaPips}}<i class="pip hex pip-btn {{#if filled}}filled{{/if}}" data-res="karma" data-i="{{i}}"></i>{{/each}}
                 </div>
               </div>
-              <div class="resnote">Gain: Stumble · Push · Refuse to Fall · your Vice. 6 → THE RECKONING (2d6, §21b). Clear by humility &amp; rest.</div>
+              <div class="resnote">Gain: two fails · Push · Refuse to Fall · your Vice. 6 → THE RECKONING (2d6, §21b). Clear by humility &amp; rest.</div>
               <div class="resrow glory">
                 <span class="rl">Glory</span>
                 <input type="number" name="system.glory" value="{{sys.glory}}" min="0" />
@@ -159,7 +159,7 @@
     {{!-- ============ TAB: COMBAT & GEAR ============ --}}
     <div class="tab" data-tab="combat" data-group="primary">
       <div class="v-quickbar">
-        <button type="button" class="roll-draw"><i class="fa-solid fa-bolt"></i> The Draw (1d6)</button>
+        <button type="button" class="roll-draw" title="{{#if sys.momentum}}Momentum: +{{sys.momentum}} die on this Draw (keep highest){{else}}Act highest to lowest{{/if}}"><i class="fa-solid fa-bolt"></i> The Draw ({{#if sys.momentum}}{{add 1 sys.momentum}}d6 kh{{else}}1d6{{/if}}){{#if sys.momentum}} <span class="mo">✦{{sys.momentum}}</span>{{/if}}</button>
         <button type="button" class="roll-dodge"><i class="fa-solid fa-person-running"></i> Dodge {{sys.dodgePool}}d</button>
         <button type="button" class="roll-block"><i class="fa-solid fa-shield-halved"></i> Block {{sys.blockPool}}d</button>
         <button type="button" class="refuse-fall" title="A blow would empty your Grit: spend 1 Vanity to stop at 1 Grit (+2 Banes)"><i class="fa-solid fa-hand"></i> Refuse to Fall</button>

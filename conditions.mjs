@@ -44,9 +44,9 @@ export const VANITY_CONDITIONS = [
     "id": "marked",
     "name": "Marked",
     "group": "combat",
-    "short": "Your next Stumble banks 2 Banes",
-    "rules": "Something patient has written your name. <b>Your next Stumble banks 2 Banes</b> instead of 1 — the GM will tell you when it lands.",
-    "ends": "Your next Stumble spends it"
+    "short": "The next Bane you bank counts as 2",
+    "rules": "Something patient has written your name. <b>The next Bane you bank counts as 2</b> instead of 1 — the GM will tell you when it lands.",
+    "ends": "The next time you bank a Bane"
   },
   {
     "id": "encumbered",

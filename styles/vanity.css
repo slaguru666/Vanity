@@ -592,6 +592,30 @@
 .vanity-buttons button:hover { background: var(--v-teal-d); }
 .vanity-buttons .vanity-fizzle { background: var(--v-plum); }
 
+/* The Bane decision: burn a Success, or take the Bane */
+.vanity-bane-choice {
+  margin-top: 7px; padding: 8px 10px; border-radius: 5px;
+  background: rgba(138, 31, 31, 0.08); border: 1px solid rgba(138, 31, 31, 0.35);
+}
+.vanity-bane-choice .warn {
+  display: block; color: #8a1f1f; font-size: 12px; line-height: 1.35;
+  margin-bottom: 7px; text-transform: none; letter-spacing: normal;
+}
+.vanity-bane-choice .vanity-buttons { margin-top: 0; }
+.vanity-bane-choice .vanity-buttons button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  line-height: 1.2; letter-spacing: 0.02em; padding: 8px 6px; text-align: center;
+}
+.vanity-bane-choice .vanity-burn { background: var(--v-gold); color: #2a1c06; }
+.vanity-bane-choice .vanity-burn:hover { background: #caa23f; }
+.vanity-bane-choice .vanity-takebane { background: #8a1f1f; color: var(--v-paper); }
+.vanity-bane-choice .vanity-takebane:hover { background: #6f1717; }
+
+/* Momentum — a great roll earns a die on the next Draw */
+.vanity-momentum { border-color: var(--v-gold); }
+.vanity-momentum .vanity-roll-label, .vanity-momentum p b { color: var(--v-gold); }
+.vanity-sheet .roll-draw .mo { color: var(--v-gold); font-weight: 700; margin-left: 3px; }
+
 /* ---------------- Roll dialog ---------------- */
 
 .vanity-roll-dialog .pool-line { font-size: 14px; }
