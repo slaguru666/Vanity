@@ -1955,7 +1955,13 @@ const HOARDS = {
   kingly: { label: "Kingly",  coin: () => `${sum(rollDice(6, 6)) * 10} gp`,       draws: 5, consum: 1, trinkets: [2, 2], hook: 1, centerpiece: true, relics: 2 }
 };
 
-async function forgeHoard({ size = "chest" } = {}) {
+/**
+ * Forge a hoard.
+ * @param {string}  size  pocket | cache | chest | vault | kingly
+ * @param {boolean} post  post the GM card. false lets a caller own the presentation.
+ * @returns {{size, label, coin, goods, relics, trinkets, centerpiece, hook, lines, card}}
+ */
+async function forgeHoard({ size = "chest", post = true } = {}) {
   const tier = HOARDS[size] ?? HOARDS.chest;
   const [weapons, armour, gear, treasure] = await Promise.all(["weapons", "armour", "gear", "treasure"].map(packDocs));
   const consumables = gear.filter(g => g.system.consumable);
@@ -1965,14 +1971,17 @@ async function forgeHoard({ size = "chest" } = {}) {
   lines.push(`<b>Coin:</b> ${tier.coin()}`);
 
   const found = [];
-  if (Math.random() < tier.consum) found.push(rnd(consumables));
-  for (let i = 0; i < tier.draws; i++) found.push(rnd(mundane));
+  // rnd() returns undefined on an empty array; a pack with no consumables would then throw on
+  // .uuid below. Guard rather than assume every pack is populated.
+  if (Math.random() < tier.consum && consumables.length) found.push(rnd(consumables));
+  for (let i = 0; i < tier.draws; i++) if (mundane.length) found.push(rnd(mundane));
   if (found.length) lines.push(`<b>Goods:</b> ${found.map(d => `@UUID[${d.uuid}]{${d.name}}`).join(" · ")}`);
 
   // A magic relic or two in the richer hoards (a fraction is a chance, an integer a count).
   const nRelics = (tier.relics ?? 0) >= 1 ? tier.relics : (Math.random() < (tier.relics ?? 0) ? 1 : 0);
+  let relics = [];
   if (nRelics && treasure.length) {
-    const relics = pickN(treasure, Math.min(nRelics, treasure.length));
+    relics = pickN(treasure, Math.min(nRelics, treasure.length));
     lines.push(`<b>Relic${relics.length > 1 ? "s" : ""}:</b> ${relics.map(d => `@UUID[${d.uuid}]{${d.name}}`).join(" · ")}`);
   }
 
@@ -1985,15 +1994,19 @@ async function forgeHoard({ size = "chest" } = {}) {
   }
   if (Math.random() < tier.hook) lines.push(`<b>The catch:</b> <i>${rnd(FORGE_HOOKS)}</i>`);
 
-  await ChatMessage.create({
-    speaker: { alias: "The Forge" },
-    whisper: ChatMessage.getWhisperRecipients("GM"),
-    content: `<div class="vanity-roll vanity-forge-card">
+  const card = `<div class="vanity-roll vanity-forge-card">
       <header><span class="vanity-roll-label">⚒ ${tier.label} hoard</span>
       <span class="vanity-roll-sub">gold you cling to buys nothing — gold you squander buys legend (§27)</span></header>
       ${lines.map(l => `<p>${l}</p>`).join("")}
-    </div>`
+    </div>`;
+
+  if (post) await ChatMessage.create({
+    speaker: { alias: "The Forge" },
+    whisper: ChatMessage.getWhisperRecipients("GM"),
+    content: card
   });
+
+  return { size, label: tier.label, goods: found, relics, lines, card };
 }
 
 /* ------------ Forge dialogs & directory buttons ------------ */
@@ -2711,7 +2724,7 @@ async function stageRasterUpload(svg, W, H, name) {
   } finally { URL.revokeObjectURL(url); }
 }
 
-async function forgeStage({ type = "barrow", size = "medium", name = "", populate = false, heat = "fight", kind = "", cast = null, activate = true } = {}) {
+async function forgeStage({ type = "barrow", size = "medium", name = "", populate = false, heat = "fight", kind = "", cast = null, activate = true, post = true, folderId = null } = {}) {
   if (!game.user.isGM) return;
   const [cols, rows] = STAGE_SIZES[size] ?? STAGE_SIZES.medium;
   name ||= stageName(type);
@@ -2778,7 +2791,7 @@ async function forgeStage({ type = "barrow", size = "medium", name = "", populat
   // placement: a supplied cast, else an auto-encounter
   let placed = cast;
   if (!placed && populate) {
-    const enc = await forgeEncounter({ heat, kind, forStage: name });
+    const enc = await forgeEncounter({ heat, kind, forStage: name, post, folderId });
     placed = enc.actors.map(a => ({ actorId: a.id, name: a.name, img: a.img, disposition: -1 }));
   }
   if (placed?.length) {
@@ -2797,7 +2810,7 @@ async function forgeStage({ type = "barrow", size = "medium", name = "", populat
   }
 
   if (activate) await scene.activate();
-  await ChatMessage.create({
+  if (post) await ChatMessage.create({
     speaker: { alias: "The Stage" },
     whisper: ChatMessage.getWhisperRecipients("GM"),
     content: `<div class="vanity-roll vanity-forge-card">
@@ -2872,10 +2885,19 @@ const HEAT_BUILDS = {
 };
 const HEAT_HOARD = { skirmish: "pocket", fight: "cache", battle: "chest", nightmare: "vault" };
 
-async function forgeEncounter({ heat = "fight", kind = "", forStage = "" } = {}) {
+/**
+ * Forge an encounter.
+ * @param {boolean} hoard     also roll a hoard. false decouples loot from combat.
+ * @param {boolean} post      post the GM card.
+ * @param {string}  folderId  put the actors in an existing folder instead of a new one, so a
+ *                            caller running many encounters does not litter the world.
+ */
+async function forgeEncounter({ heat = "fight", kind = "", forStage = "", hoard = true, post = true, folderId = null } = {}) {
   const t = FORGE_MONSTERS[kind] ? kind : rnd(Object.keys(FORGE_MONSTERS));
   const build = (HEAT_BUILDS[heat] ?? HEAT_BUILDS.fight)();
-  const folder = await Folder.create({ name: `Encounter — ${t} (${heat})`, type: "Actor" });
+  const folder = folderId
+    ? (game.folders?.get?.(folderId) ?? { id: folderId })
+    : await Folder.create({ name: `Encounter — ${t} (${heat})`, type: "Actor" });
 
   const actors = [];
   for (const [menace, count] of Object.entries(build)) {
@@ -2893,7 +2915,7 @@ async function forgeEncounter({ heat = "fight", kind = "", forStage = "" } = {})
     mood = ["Hostile", "Wary", "Neutral", "Friendly"][Math.min(rs, 3)];
   }
 
-  await ChatMessage.create({
+  if (post) await ChatMessage.create({
     speaker: { alias: "The Forge" },
     whisper: ChatMessage.getWhisperRecipients("GM"),
     content: `<div class="vanity-roll vanity-forge-card">
@@ -2905,8 +2927,8 @@ async function forgeEncounter({ heat = "fight", kind = "", forStage = "" } = {})
       <p><b>The catch:</b> <i>${complication}</i></p>
     </div>`
   });
-  await forgeHoard({ size: HEAT_HOARD[heat] ?? "cache" });
-  return { actors, situation, terrain, complication, mood, folder };
+  const hoardResult = hoard ? await forgeHoard({ size: HEAT_HOARD[heat] ?? "cache", post }) : null;
+  return { actors, situation, terrain, complication, mood, folder, hoard: hoardResult };
 }
 
 /* -------------------------------------------- */
